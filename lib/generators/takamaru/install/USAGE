@@ -1,0 +1,3 @@
+Description:
+  Generates (but does not run) a migration to add a commit log table. Also generates an initializer file for configuring
+  Takamaru. See Generators section in README.md for more information.

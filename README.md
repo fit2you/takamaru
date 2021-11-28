@@ -12,6 +12,10 @@ Messages gem for Sasori microservices.
 - Tell `git` where to find the project shared hooks: `git config core.hooksPath .githooks`.
 - Run `bundle` to install all the gems.
 
+## Generators
+
+TODO:
+
 ## Code Style
 
 [Rubocop](https://github.com/rubocop/rubocop) gem is enabled by default in `devcontainer` and will automatically format

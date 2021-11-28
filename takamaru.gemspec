@@ -14,6 +14,7 @@ Gem::Specification.new do |spec|
   spec.version = Takamaru::VERSION
 
   spec.add_dependency('activejob', '>= 4.2.7.1')
+  spec.add_dependency('activerecord', '>= 4.2.7.1')
 
   spec.add_development_dependency('bundler-audit')
   spec.add_development_dependency('byebug')
