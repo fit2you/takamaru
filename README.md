@@ -14,7 +14,8 @@ Messages gem for Sasori microservices.
 
 ## Generators
 
-TODO:
+Takamaru has one generator, `takamaru:install`. It writes, but does not run, a migration file. The migration creates the
+commit log table.
 
 ## Code Style
 
