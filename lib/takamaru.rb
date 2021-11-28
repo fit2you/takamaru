@@ -1,5 +1,5 @@
 class Takamaru
   def self.hi
-    puts "Hello, world!"
+    puts 'Hello, world!'
   end
 end
