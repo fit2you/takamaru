@@ -1,0 +1,5 @@
+/coverage
+/spec/examples.txt
+/tmp/*
+
+!/tmp/.keep

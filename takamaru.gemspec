@@ -9,6 +9,11 @@ Gem::Specification.new do |s|
   s.homepage = 'https://rubygems.org/gems/hola'
   s.license = 'MIT'
 
+  s.add_development_dependency('bundler-audit')
+  s.add_development_dependency('byebug')
+  s.add_development_dependency('rspec-rails')
   s.add_development_dependency('rubocop')
   s.add_development_dependency('rubocop-shopify')
+  s.add_development_dependency('rubycritic')
+  s.add_development_dependency('simplecov')
 end

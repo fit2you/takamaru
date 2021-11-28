@@ -30,6 +30,9 @@ RUN apt-get update -qq \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
   && truncate -s 0 /var/log/*log
 
+# Upgrade rubygems
+RUN gem update --system
+
 # Add user sasori
 RUN useradd -m -s /bin/bash sasori \
   && usermod -aG sudo sasori \
