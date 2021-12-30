@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     takamaru (0.0.0)
-      activejob (>= 4.2.7.1)
-      activerecord (>= 4.2.7.1)
+      activejob (>= 4.2.7.1, < 7.0)
+      activerecord (>= 4.2.7.1, < 7.0)
 
 GEM
   remote: https://rubygems.org/

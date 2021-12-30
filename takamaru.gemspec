@@ -10,11 +10,11 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir['lib/**/*', 'LICENSE'].reject { |f| File.directory?(f) }
   spec.name = 'takamaru'
-  spec.required_ruby_version = '>= 2.3.6'
+  spec.required_ruby_version = ['>= 2.3.6', '< 3.0']
   spec.version = Takamaru::VERSION
 
-  spec.add_dependency('activejob', '>= 4.2.7.1')
-  spec.add_dependency('activerecord', '>= 4.2.7.1')
+  spec.add_runtime_dependency('activejob', ['>= 4.2.7.1', '< 7.0'])
+  spec.add_runtime_dependency('activerecord', ['>= 4.2.7.1', '< 7.0'])
 
   spec.add_development_dependency('bundler-audit')
   spec.add_development_dependency('byebug')
