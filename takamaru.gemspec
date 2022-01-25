@@ -15,6 +15,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency('activejob', ['>= 4.2.7.1', '< 7.0'])
   spec.add_runtime_dependency('activerecord', ['>= 4.2.7.1', '< 7.0'])
+  spec.add_runtime_dependency('httparty', ['~> 0.20.0'])
 
   spec.add_development_dependency('bundler-audit')
   spec.add_development_dependency('byebug')
