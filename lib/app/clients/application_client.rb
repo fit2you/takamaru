@@ -1,0 +1,22 @@
+class ApplicationClient
+  include HTTParty
+
+  default_timeout 120
+  debug_output($stdout) if Rails.env.development?
+
+  class << self
+    private
+
+    def config
+      Rails.application.config_for(name.underscore)
+    end
+
+    def json_header
+      { 'Content-Type' => 'application/json' }
+    end
+
+    def options
+      { headers: json_header }
+    end
+  end
+end
