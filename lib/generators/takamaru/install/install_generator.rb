@@ -6,8 +6,8 @@ module Takamaru
 
     desc 'Generates (but does not run) a migration to add a commit log table.' \
       'See Generators section in README.md for more information.'
-
     def create_migration_file
+      say('Generating migration file...')
       add_takamaru_migration('create_takamaru_commit_logs')
     end
   end

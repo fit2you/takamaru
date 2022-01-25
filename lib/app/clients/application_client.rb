@@ -7,10 +7,6 @@ class ApplicationClient
   class << self
     private
 
-    def config
-      Rails.application.config_for(name.underscore)
-    end
-
     def json_header
       { 'Content-Type' => 'application/json' }
     end

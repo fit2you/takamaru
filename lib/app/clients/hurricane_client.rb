@@ -1,5 +1,5 @@
 class HurricaneClient < ApplicationClient
-  base_uri config[:base_uri]
+  base_uri ENV.fetch('HURRICANE_BASE_URI')
 
   class << self
     def insurance_company(id)
