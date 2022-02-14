@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.version = Takamaru::VERSION
 
   spec.add_runtime_dependency('httparty', ['~> 0.20.0'])
-  spec.add_runtime_dependency('rails', ['>= 4.2.7.1', '< 7.0'])
+  spec.add_runtime_dependency('rails', ['>= 4.2.7.1', '< 7.1'])
 
   spec.add_development_dependency('bundler-audit')
   spec.add_development_dependency('byebug')
