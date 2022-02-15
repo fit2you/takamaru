@@ -1,5 +1,5 @@
 ARG RUBY_VERSION
-FROM ruby:${RUBY_VERSION}-slim-stretch
+FROM ruby:${RUBY_VERSION}-slim-bullseye
 
 # SSL hotfix
 RUN apt-get update -qq \
