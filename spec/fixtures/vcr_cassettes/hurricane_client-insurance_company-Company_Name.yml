@@ -1,0 +1,45 @@
+---
+http_interactions:
+  - request:
+      method: get
+      uri: http://hurricane:3000/api/v2/insurance_companies/Company+Name
+      body:
+        encoding: US-ASCII
+        string: ''
+      headers:
+        Content-Type:
+          - application/json
+        Accept-Encoding:
+          - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+        Accept:
+          - '*/*'
+        User-Agent:
+          - Ruby
+    response:
+      status:
+        code: 200
+        message: OK
+      headers:
+        X-Frame-Options:
+          - SAMEORIGIN
+        X-Xss-Protection:
+          - 1; mode=block
+        X-Content-Type-Options:
+          - nosniff
+        Content-Type:
+          - application/vnd.api+json; charset=utf-8
+        Etag:
+          - W/"eef57b57253fc4ae5ba109349a24f657"
+        Cache-Control:
+          - max-age=0, private, must-revalidate
+        X-Request-Id:
+          - 0e1c2867-d013-41d4-a32f-c7ccc7a17172
+        X-Runtime:
+          - '0.143819'
+        Transfer-Encoding:
+          - chunked
+      body:
+        encoding: UTF-8
+        string: '{"data":{"id":"42","type":"insuranceCompanies","attributes":{"createdAt":"2020-09-04T11:00:00.000Z","name":"Company Name","updatedAt":"2020-09-04T11:01:00.000Z"}},"jsonapi":{"version":"1.0"}}'
+    recorded_at: Tue, 15 Feb 2022 16:17:46 GMT
+recorded_with: VCR 6.0.0

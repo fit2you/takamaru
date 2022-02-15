@@ -107,7 +107,7 @@ RSpec.configure do |config|
   Kernel.srand(config.seed)
 end
 
-ENV['HURRICANE_BASE_URI'] = 'http://localhost:3000'
+ENV['HURRICANE_BASE_URI'] = 'http://hurricane:3000'
 ENV['RAILS_ENV'] = 'test'
 
 require 'active_job'
@@ -115,3 +115,9 @@ require 'active_record'
 require 'httparty'
 require 'rails'
 require 'takamaru'
+require 'vcr'
+
+VCR.configure do |config|
+  config.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
+  config.hook_into(:webmock)
+end
