@@ -108,10 +108,10 @@ RSpec.configure do |config|
 end
 
 ENV['HURRICANE_BASE_URI'] = 'http://localhost:3000'
+ENV['RAILS_ENV'] = 'test'
 
 require 'active_job'
 require 'active_record'
-require 'byebug'
 require 'httparty'
 require 'rails'
 require 'takamaru'

@@ -12,7 +12,7 @@ module Takamaru
     protected
 
     def add_takamaru_migration(template, extra_options = {})
-      migration_dir = File.expand_path('db/migrate')
+      migration_dir = File.expand_path(Rails.env.test? ? 'tmp/db/migrate' : 'db/migrate')
       if self.class.migration_exists?(migration_dir, template)
         ::Kernel.warn("Migration already exists: #{template}")
       else
