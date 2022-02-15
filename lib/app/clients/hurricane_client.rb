@@ -21,7 +21,7 @@ class HurricaneClient < ApplicationClient
     private
 
     def insurance_company_by(value)
-      response = get("/api/v2/insurance_companies/#{CGI.escape(value)}", options)
+      response = get("/api/v2/insurance_companies/#{CGI.escape(value.to_s)}", options)
       return nil if response.code == 404
 
       # TODO: handle errors
@@ -29,7 +29,7 @@ class HurricaneClient < ApplicationClient
     end
 
     def user_by(value)
-      response = get("/api/v2/users/#{CGI.escape(value)}", options)
+      response = get("/api/v2/users/#{CGI.escape(value.to_s)}", options)
       return nil if response.code == 404
 
       # TODO: handle errors
