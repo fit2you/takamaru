@@ -107,5 +107,11 @@ RSpec.configure do |config|
   Kernel.srand(config.seed)
 end
 
+ENV['HURRICANE_BASE_URI'] = 'http://localhost:3000'
+
+require 'active_job'
+require 'active_record'
 require 'byebug'
+require 'httparty'
+require 'rails'
 require 'takamaru'
