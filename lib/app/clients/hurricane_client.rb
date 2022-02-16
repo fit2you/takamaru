@@ -2,12 +2,9 @@ class HurricaneClient < ApplicationClient
   base_uri ENV.fetch('HURRICANE_BASE_URI')
 
   class << self
-    def insurance_company(id)
-      insurance_company_by(id)
-    end
-
-    def insurance_company_by_name(name)
-      insurance_company_by(name)
+    def insurance_company(param)
+      get("/api/v2/insurance_companies/#{CGI.escape(param.to_s)}", options)
+      # TODO: handle errors
     end
 
     def insurance_companies
@@ -19,14 +16,6 @@ class HurricaneClient < ApplicationClient
     end
 
     private
-
-    def insurance_company_by(value)
-      response = get("/api/v2/insurance_companies/#{CGI.escape(value.to_s)}", options)
-      return nil if response.code == 404
-
-      # TODO: handle errors
-      response.parsed_response.fetch('data').with_indifferent_access
-    end
 
     def user_by(value)
       response = get("/api/v2/users/#{CGI.escape(value.to_s)}", options)
