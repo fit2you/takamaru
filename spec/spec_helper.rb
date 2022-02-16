@@ -118,6 +118,10 @@ require 'takamaru'
 require 'vcr'
 
 VCR.configure do |config|
+  config.before_http_request(:real?) do |request|
+    request.headers['Accept'] = 'application/json'
+    request.headers['Accept-Encoding'] = 'identity'
+  end
   config.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
   config.hook_into(:webmock)
 end

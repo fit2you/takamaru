@@ -2,7 +2,7 @@
 http_interactions:
   - request:
       method: get
-      uri: http://hurricane:3000/api/v2/insurance_companies/Company+Name
+      uri: http://hurricane:3000/api/v2/users/42
       body:
         encoding: US-ASCII
         string: ''
@@ -29,17 +29,17 @@ http_interactions:
         Content-Type:
           - application/vnd.api+json; charset=utf-8
         Etag:
-          - W/"eef57b57253fc4ae5ba109349a24f657"
+          - W/"d16eab871cec56bb26f97dc975615cef"
         Cache-Control:
           - max-age=0, private, must-revalidate
         X-Request-Id:
-          - 0e1c2867-d013-41d4-a32f-c7ccc7a17172
+          - 0ef57361-f7b7-4dc3-ba33-5c73b0009d04
         X-Runtime:
-          - '0.143819'
+          - '0.223067'
         Transfer-Encoding:
           - chunked
       body:
         encoding: UTF-8
-        string: '{"data":{"id":"42","type":"insuranceCompanies","attributes":{"createdAt":"2020-09-04T11:00:00.000Z","name":"Company Name","updatedAt":"2020-09-04T11:01:00.000Z"}},"jsonapi":{"version":"1.0"}}'
-    recorded_at: Tue, 15 Feb 2022 16:17:46 GMT
+        string: '{"data":{"id":"42","type":"users","attributes":{"customSchema":"custom_schema"}},"jsonapi":{"version":"1.0"}}'
+    recorded_at: Wed, 16 Feb 2022 12:03:00 GMT
 recorded_with: VCR 6.0.0

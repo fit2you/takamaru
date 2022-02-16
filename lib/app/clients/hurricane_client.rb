@@ -7,7 +7,7 @@ class HurricaneClient < ApplicationClient
     end
 
     def user(id)
-      do_request(:get, "/api/v2/insurance_companies/#{id}", options)
+      do_request(:get, "/api/v2/users/#{id}", options)
     end
   end
 end
