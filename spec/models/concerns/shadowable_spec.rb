@@ -53,4 +53,20 @@ RSpec.describe(Takamaru::Shadowable) do
       end
     end
   end
+
+  describe 'self.upsert_from_response!' do
+    let(:response) { instance_double(HTTParty::Response, body: response_body) }
+    let(:response_body) do
+      { data: {
+        id: 42,
+        type: 'dummyModels',
+        attributes: {},
+      } }.to_json
+    end
+
+    it('returns a new dummy_model') do
+      allow(response).to(receive(:parsed_response).and_return(JSON.parse(response_body)))
+      expect(dummy_model.upsert_from_response!(response)).to(be_a(dummy_model))
+    end
+  end
 end

@@ -22,12 +22,11 @@ module Takamaru
     included do
       class << self
         def find_or_upsert_from_remote!(id)
-          find(id) || upsert_from_response!(@shadow_client.send(@shadow_finder_method, id))
+          find(id) || upsert_from_remote!(id)
         end
 
         def find_or_upsert_from_remote_by!(attribute, value)
-          find_by(attribute => value) ||
-            upsert_from_response!(@shadow_client.send(@shadow_finder_by_method, attribute, value))
+          find_by(attribute => value) || upsert_from_remote_by!(attribute, value)
         end
 
         def method_missing(method_name, *args)
@@ -62,11 +61,11 @@ module Takamaru
         end
 
         def upsert_from_remote!(id)
-          upsert_from_response(@shadow_client.send(@shadow_finder_method, id))
+          upsert_from_response!(@shadow_client.send(@shadow_finder_method, id))
         end
 
         def upsert_from_remote_by!(attribute, value)
-          upsert_from_response(@shadow_client.send(@shadow_finder_by_method, attribute, value))
+          upsert_from_response!(@shadow_client.send(@shadow_finder_by_method, attribute, value))
         end
       end
     end
