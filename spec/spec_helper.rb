@@ -114,8 +114,11 @@ require 'active_job'
 require 'active_record'
 require 'httparty'
 require 'rails'
+require 'set'
 require 'takamaru'
 require 'vcr'
+
+USED_CASSETTES = Set.new
 
 VCR.configure do |config|
   config.before_http_request(:real?) do |request|

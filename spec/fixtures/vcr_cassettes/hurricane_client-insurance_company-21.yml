@@ -2,7 +2,7 @@
 http_interactions:
   - request:
       method: get
-      uri: http://hurricane:3000/api/v2/insurance_companies/Unknown+Company
+      uri: http://hurricane:3000/api/v2/insurance_companies/21
       body:
         encoding: US-ASCII
         string: ''
@@ -12,7 +12,7 @@ http_interactions:
         Accept-Encoding:
           - identity
         Accept:
-          - - application/json
+          - application/json
         User-Agent:
           - Ruby
     response:
@@ -31,13 +31,14 @@ http_interactions:
         Cache-Control:
           - no-cache
         X-Request-Id:
-          - 0a8815fa-f6a7-4be7-9b86-8c1ecf82cfa3
+          - e91859e6-2dc6-4e7a-aeeb-37b8a479f52a
         X-Runtime:
-          - '0.183042'
+          - '0.020729'
         Transfer-Encoding:
           - chunked
       body:
-        encoding: UTF-8
-        string: '{"errors":[{"detail":"La risorsa richiesta non è stata trovata.","id":"0a8815fa-f6a7-4be7-9b86-8c1ecf82cfa3","status":"404","title":"Not Found"}]}'
-    recorded_at: Wed, 16 Feb 2022 11:08:09 GMT
+        encoding: ASCII-8BIT
+        string: !binary |-
+          eyJlcnJvcnMiOlt7ImlkIjoiZTkxODU5ZTYtMmRjNi00ZTdhLWFlZWItMzdiOGE0NzlmNTJhIiwic3RhdHVzIjoiNDA0IiwidGl0bGUiOiJOb3QgRm91bmQiLCJkZXRhaWwiOiJMYSByaXNvcnNhIHJpY2hpZXN0YSBub24gw6ggc3RhdGEgdHJvdmF0YS4ifV19
+    recorded_at: Thu, 17 Feb 2022 10:39:41 GMT
 recorded_with: VCR 6.0.0
