@@ -3,6 +3,8 @@ module Takamaru
     extend ActiveSupport::Concern
 
     module ClassMethods
+      attr_reader :shadow_attributes
+
       def has_shadow_attributes(*attributes)
         @shadow_attributes = attributes
         # TODO: updates to shadow_attributes should be forbidden
@@ -11,20 +13,21 @@ module Takamaru
       def has_shadow_client(*args)
         options = args.last.is_a?(Hash) ? args.pop : {}
 
-        @client = args.first
-        @finder_method = options[:finder_method] || name.underscore
-        @finder_by_method = options[:finder_by_method] || "#{name.underscore}_by"
+        @shadow_client = args.first
+        @shadow_finder_method = options[:finder_method] || name.underscore
+        @shadow_finder_by_method = options[:finder_by_method] || "#{name.underscore}_by"
       end
     end
 
     included do
       class << self
         def find_or_upsert_from_remote!(id)
-          find(id) || upsert_from_response(@client.send(@finder_method, id))
+          find(id) || upsert_from_response!(@shadow_client.send(@shadow_finder_method, id))
         end
 
         def find_or_upsert_from_remote_by!(attribute, value)
-          find_by(attribute => value) || upsert_from_remote_by!(attribute, value)
+          find_by(attribute => value) ||
+            upsert_from_response!(@shadow_client.send(@shadow_finder_by_method, attribute, value))
         end
 
         def method_missing(method_name, *args)
@@ -39,7 +42,7 @@ module Takamaru
           end
         end
 
-        def upsert_from_response(response)
+        def upsert_from_response!(response)
           data = response.parsed_response.fetch('data').with_indifferent_access
 
           origin_id = data[:id]
@@ -59,11 +62,11 @@ module Takamaru
         end
 
         def upsert_from_remote!(id)
-          upsert_from_response(@client.send(@finder_method, id))
+          upsert_from_response(@shadow_client.send(@shadow_finder_method, id))
         end
 
         def upsert_from_remote_by!(attribute, value)
-          upsert_from_response(@client.send(@finder_by_method, attribute, value))
+          upsert_from_response(@shadow_client.send(@shadow_finder_by_method, attribute, value))
         end
       end
     end
