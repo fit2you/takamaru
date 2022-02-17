@@ -1,0 +1,45 @@
+---
+http_interactions:
+  - request:
+      method: get
+      uri: http://hurricane:3000/api/v2/users/42
+      body:
+        encoding: US-ASCII
+        string: ''
+      headers:
+        Content-Type:
+          - application/json
+        Accept-Encoding:
+          - identity
+        Accept:
+          - application/json
+        User-Agent:
+          - Ruby
+    response:
+      status:
+        code: 200
+        message: OK
+      headers:
+        X-Frame-Options:
+          - SAMEORIGIN
+        X-Xss-Protection:
+          - 1; mode=block
+        X-Content-Type-Options:
+          - nosniff
+        Content-Type:
+          - application/vnd.api+json; charset=utf-8
+        Etag:
+          - W/"86037e1edd1cf49e7d81d6f3c3617690"
+        Cache-Control:
+          - max-age=0, private, must-revalidate
+        X-Request-Id:
+          - e5b7c8c8-a301-4802-9a4f-3a936c315833
+        X-Runtime:
+          - '0.046289'
+        Transfer-Encoding:
+          - chunked
+      body:
+        encoding: UTF-8
+        string: '{"data":{"id":"42","type":"users","attributes":{"customSchema":"bramocar"}},"jsonapi":{"version":"1.0"}}'
+    recorded_at: Thu, 17 Feb 2022 10:44:41 GMT
+recorded_with: VCR 6.0.0

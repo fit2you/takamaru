@@ -1,0 +1,44 @@
+---
+http_interactions:
+  - request:
+      method: get
+      uri: http://hurricane:3000/api/v2/users/21
+      body:
+        encoding: US-ASCII
+        string: ''
+      headers:
+        Content-Type:
+          - application/json
+        Accept-Encoding:
+          - identity
+        Accept:
+          - application/json
+        User-Agent:
+          - Ruby
+    response:
+      status:
+        code: 404
+        message: Not Found
+      headers:
+        X-Frame-Options:
+          - SAMEORIGIN
+        X-Xss-Protection:
+          - 1; mode=block
+        X-Content-Type-Options:
+          - nosniff
+        Content-Type:
+          - application/json; charset=utf-8
+        Cache-Control:
+          - no-cache
+        X-Request-Id:
+          - d64bbc56-693a-42af-b4e9-28b3483258e8
+        X-Runtime:
+          - '0.026333'
+        Transfer-Encoding:
+          - chunked
+      body:
+        encoding: ASCII-8BIT
+        string: !binary |-
+          eyJlcnJvcnMiOlt7ImlkIjoiZDY0YmJjNTYtNjkzYS00MmFmLWI0ZTktMjhiMzQ4MzI1OGU4Iiwic3RhdHVzIjoiNDA0IiwidGl0bGUiOiJOb3QgRm91bmQiLCJkZXRhaWwiOiJMYSByaXNvcnNhIHJpY2hpZXN0YSBub24gw6ggc3RhdGEgdHJvdmF0YS4ifV19
+    recorded_at: Thu, 17 Feb 2022 10:44:41 GMT
+recorded_with: VCR 6.0.0
