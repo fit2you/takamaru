@@ -112,6 +112,7 @@ ENV['RAILS_ENV'] = 'test'
 
 require 'active_job'
 require 'active_record'
+require 'factory_bot'
 require 'httparty'
 require 'rails'
 require 'set'
