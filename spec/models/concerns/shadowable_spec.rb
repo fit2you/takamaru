@@ -34,13 +34,13 @@ RSpec.describe(Takamaru::Shadowable) do
     end
   end
 
-  describe 'self.find_or_upsert_from_remote_by!' do
+  describe 'self.find_or_upsert_from_remote_by_attribute!' do
     describe 'with an existing record' do
       it('calls find once') do
         expect(dummy_model).to(receive(:find_by).once.and_return(dummy_model.new))
         expect(dummy_model).to_not(receive(:upsert_from_response!))
 
-        dummy_model.find_or_upsert_from_remote_by!(:attribute, :value)
+        dummy_model.find_or_upsert_from_remote_by_attribute!(:value)
       end
     end
 
@@ -49,7 +49,7 @@ RSpec.describe(Takamaru::Shadowable) do
         expect(dummy_model).to(receive(:find_by).once)
         expect(dummy_model).to(receive(:upsert_from_response!).once)
 
-        dummy_model.find_or_upsert_from_remote_by!(:attribute, :value)
+        dummy_model.find_or_upsert_from_remote_by_attribute!(:value)
       end
     end
   end
@@ -67,6 +67,14 @@ RSpec.describe(Takamaru::Shadowable) do
     it('returns a new dummy_model') do
       allow(response).to(receive(:parsed_response).and_return(JSON.parse(response_body)))
       expect(dummy_model.upsert_from_response!(response)).to(be_a(dummy_model))
+    end
+  end
+
+  describe 'self.upsert_from_remote_by_attribute!' do
+    it('calls upsert_from_remote_by! once') do
+      expect(dummy_model).to(receive(:upsert_from_remote_by!).once)
+
+      dummy_model.upsert_from_remote_by_attribute!(:value)
     end
   end
 end
