@@ -2,7 +2,7 @@
 http_interactions:
   - request:
       method: get
-      uri: http://hurricane:3000/api/v2/insurance_companies/Unknown+Company
+      uri: http://hurricane:3000/api/v2/insurance_companies/by/name/Company+Name
       body:
         encoding: US-ASCII
         string: ''
@@ -12,13 +12,13 @@ http_interactions:
         Accept-Encoding:
           - identity
         Accept:
-          - - application/json
+          - application/json
         User-Agent:
           - Ruby
     response:
       status:
-        code: 404
-        message: Not Found
+        code: 200
+        message: OK
       headers:
         X-Frame-Options:
           - SAMEORIGIN
@@ -27,17 +27,21 @@ http_interactions:
         X-Content-Type-Options:
           - nosniff
         Content-Type:
-          - application/json; charset=utf-8
+          - application/vnd.api+json; charset=utf-8
+        Etag:
+          - W/"64b0b9eb95a005ef60139ecd3a6e0931"
         Cache-Control:
-          - no-cache
+          - max-age=0, private, must-revalidate
         X-Request-Id:
-          - 0a8815fa-f6a7-4be7-9b86-8c1ecf82cfa3
+          - c99f5373-9457-4ef5-9137-9b5fa630d8ca
         X-Runtime:
-          - '0.183042'
+          - '0.033582'
         Transfer-Encoding:
           - chunked
       body:
         encoding: UTF-8
-        string: '{"errors":[{"detail":"La risorsa richiesta non è stata trovata.","id":"0a8815fa-f6a7-4be7-9b86-8c1ecf82cfa3","status":"404","title":"Not Found"}]}'
-    recorded_at: Wed, 16 Feb 2022 11:08:09 GMT
+        string:
+          '{"data":{"id":"35","type":"insuranceCompanies","attributes":{"createdAt":"2021-06-29T12:25:31.724Z","name":"Company
+          Name","updatedAt":"2022-02-17T10:36:12.786Z"}},"jsonapi":{"version":"1.0"}}'
+    recorded_at: Thu, 17 Feb 2022 10:37:17 GMT
 recorded_with: VCR 6.0.0

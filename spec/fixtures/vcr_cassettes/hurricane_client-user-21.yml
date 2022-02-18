@@ -12,7 +12,7 @@ http_interactions:
         Accept-Encoding:
           - identity
         Accept:
-          - - application/json
+          - application/json
         User-Agent:
           - Ruby
     response:
@@ -31,13 +31,14 @@ http_interactions:
         Cache-Control:
           - no-cache
         X-Request-Id:
-          - 83fe8130-d7f5-4877-a0b2-3ad4f562cba8
+          - d64bbc56-693a-42af-b4e9-28b3483258e8
         X-Runtime:
-          - '0.183042'
+          - '0.026333'
         Transfer-Encoding:
           - chunked
       body:
-        encoding: UTF-8
-        string: '{"errors":[{"detail":"La risorsa richiesta non è stata trovata.","id":"83fe8130-d7f5-4877-a0b2-3ad4f562cba8","status":"404","title":"Not Found"}]}'
-    recorded_at: Wed, 16 Feb 2022 11:08:09 GMT
+        encoding: ASCII-8BIT
+        string: !binary |-
+          eyJlcnJvcnMiOlt7ImlkIjoiZDY0YmJjNTYtNjkzYS00MmFmLWI0ZTktMjhiMzQ4MzI1OGU4Iiwic3RhdHVzIjoiNDA0IiwidGl0bGUiOiJOb3QgRm91bmQiLCJkZXRhaWwiOiJMYSByaXNvcnNhIHJpY2hpZXN0YSBub24gw6ggc3RhdGEgdHJvdmF0YS4ifV19
+    recorded_at: Thu, 17 Feb 2022 10:44:41 GMT
 recorded_with: VCR 6.0.0

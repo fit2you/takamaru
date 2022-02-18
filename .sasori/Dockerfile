@@ -20,6 +20,7 @@ RUN apt-get update -qq \
   httpie \
   iputils-ping \
   less \
+  libsqlite3-dev \
   lsb-release \
   nano \
   ssh \

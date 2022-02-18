@@ -108,14 +108,16 @@ RSpec.configure do |config|
 end
 
 ENV['HURRICANE_BASE_URI'] = 'http://hurricane:3000'
-ENV['RAILS_ENV'] = 'test'
 
-require 'active_job'
-require 'active_record'
+require 'bunny'
+require 'database_cleaner/active_record'
+require 'debug'
+require 'factory_bot'
 require 'httparty'
-require 'rails'
-require 'takamaru'
+require 'set'
 require 'vcr'
+
+USED_CASSETTES = Set.new
 
 VCR.configure do |config|
   config.before_http_request(:real?) do |request|

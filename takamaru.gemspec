@@ -17,12 +17,17 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency('rails', ['>= 4.2.7.1', '< 7.1'])
 
   spec.add_development_dependency('bundler-audit')
+  spec.add_development_dependency('bunny')
+  spec.add_development_dependency('database_cleaner-active_record')
+  spec.add_development_dependency('debug')
+  spec.add_development_dependency('factory_bot')
   spec.add_development_dependency('generator_spec')
   spec.add_development_dependency('rspec-rails')
   spec.add_development_dependency('rubocop')
   spec.add_development_dependency('rubocop-shopify')
   spec.add_development_dependency('rubycritic')
   spec.add_development_dependency('simplecov')
+  spec.add_development_dependency('sqlite3')
   spec.add_development_dependency('vcr')
   spec.add_development_dependency('webmock')
 end

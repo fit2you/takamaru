@@ -2,7 +2,7 @@
 http_interactions:
   - request:
       method: get
-      uri: http://hurricane:3000/api/v2/users/42
+      uri: http://hurricane:3000/api/v2/insurance_companies/by/name/Unknown+Company
       body:
         encoding: US-ASCII
         string: ''
@@ -17,8 +17,8 @@ http_interactions:
           - Ruby
     response:
       status:
-        code: 200
-        message: OK
+        code: 404
+        message: Not Found
       headers:
         X-Frame-Options:
           - SAMEORIGIN
@@ -27,19 +27,18 @@ http_interactions:
         X-Content-Type-Options:
           - nosniff
         Content-Type:
-          - application/vnd.api+json; charset=utf-8
-        Etag:
-          - W/"86037e1edd1cf49e7d81d6f3c3617690"
+          - application/json; charset=utf-8
         Cache-Control:
-          - max-age=0, private, must-revalidate
+          - no-cache
         X-Request-Id:
-          - e5b7c8c8-a301-4802-9a4f-3a936c315833
+          - 365d6710-6171-44d4-b463-4da2fb88fc2b
         X-Runtime:
-          - '0.046289'
+          - '0.027192'
         Transfer-Encoding:
           - chunked
       body:
-        encoding: UTF-8
-        string: '{"data":{"id":"42","type":"users","attributes":{"customSchema":"bramocar"}},"jsonapi":{"version":"1.0"}}'
-    recorded_at: Thu, 17 Feb 2022 10:44:41 GMT
+        encoding: ASCII-8BIT
+        string: !binary |-
+          eyJlcnJvcnMiOlt7ImlkIjoiMzY1ZDY3MTAtNjE3MS00NGQ0LWI0NjMtNGRhMmZiODhmYzJiIiwic3RhdHVzIjoiNDA0IiwidGl0bGUiOiJOb3QgRm91bmQiLCJkZXRhaWwiOiJMYSByaXNvcnNhIHJpY2hpZXN0YSBub24gw6ggc3RhdGEgdHJvdmF0YS4ifV19
+    recorded_at: Thu, 17 Feb 2022 10:37:17 GMT
 recorded_with: VCR 6.0.0
