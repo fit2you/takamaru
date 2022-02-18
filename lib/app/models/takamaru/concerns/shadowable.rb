@@ -21,7 +21,9 @@ module Takamaru
     included do
       class << self
         def find_or_upsert_from_remote!(id)
-          find(id) || upsert_from_remote!(id)
+          find(id)
+        rescue ActiveRecord::RecordNotFound
+          upsert_from_remote!(id)
         end
 
         def find_or_upsert_from_remote_by!(attribute, value)

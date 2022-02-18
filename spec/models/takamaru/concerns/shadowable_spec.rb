@@ -26,7 +26,7 @@ RSpec.describe(Takamaru::Shadowable) do
 
     describe 'with an unknown local record' do
       it('calls upsert_from_response! once') do
-        expect(dummy_shadowable_class).to(receive(:find).once)
+        expect(dummy_shadowable_class).to(receive(:find).once.and_raise(ActiveRecord::RecordNotFound))
         expect(dummy_shadowable_class).to(receive(:upsert_from_response!).once)
 
         dummy_shadowable_class.find_or_upsert_from_remote!(42)
