@@ -109,6 +109,7 @@ end
 
 ENV['HURRICANE_BASE_URI'] = 'http://hurricane:3000'
 
+require 'bunny'
 require 'database_cleaner/active_record'
 require 'debug'
 require 'factory_bot'
