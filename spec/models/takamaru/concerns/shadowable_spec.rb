@@ -10,8 +10,8 @@ RSpec.describe(Takamaru::Shadowable) do
 
   it('has shadow client') do
     expect(dummy_shadowable_class.instance_variable_get(:@shadow_client)).to(eq(dummy_client_class))
-    expect(dummy_shadowable_class.instance_variable_get(:@shadow_finder_method)).to(eq(:dummy_finder_method))
-    expect(dummy_shadowable_class.instance_variable_get(:@shadow_finder_by_method)).to(eq(:dummy_finder_by_method))
+    expect(dummy_shadowable_class.instance_variable_get(:@shadow_finder_method)).to(eq('dummy_shadowable'))
+    expect(dummy_shadowable_class.instance_variable_get(:@shadow_finder_by_method)).to(eq('dummy_shadowable_by'))
   end
 
   describe 'self.find_or_upsert_from_remote!' do
