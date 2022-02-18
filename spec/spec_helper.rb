@@ -112,6 +112,8 @@ ENV['RAILS_ENV'] = 'test'
 
 require 'active_job'
 require 'active_record'
+require 'database_cleaner/active_record'
+require 'debug'
 require 'factory_bot'
 require 'httparty'
 require 'rails'
