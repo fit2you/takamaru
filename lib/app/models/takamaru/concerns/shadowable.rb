@@ -38,7 +38,7 @@ module Takamaru
 
         def method_missing(method_name, *args)
           dynamic_upsert_methods_prefixes = %w[find_or_upsert_from_remote_by_ upsert_from_remote_by_]
-          return foo(method_name, args) if method_name.to_s.gsub(/[^_]+$/, '').in?(dynamic_upsert_methods_prefixes)
+          return foo(method_name, *args) if method_name.to_s.gsub(/[^_]+$/, '').in?(dynamic_upsert_methods_prefixes)
 
           super
         end
