@@ -11,9 +11,9 @@ module Takamaru
       after_update :publish_update_message
     end
 
-    def without_commit_log
+    def without_commit_log(&block)
       @do_not_log_commit = true
-      yield
+      yield self
       @do_not_log_commit = false
     end
 

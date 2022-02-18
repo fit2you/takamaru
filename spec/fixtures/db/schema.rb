@@ -1,5 +1,11 @@
 ActiveRecord::Schema.define(version: 20200904110000) do
-  create_table 'dummy_models' do |t|
+  create_table 'dummy_commit_loggables' do |t|
+    t.string(:name)
+    t.timestamps(null: false)
+  end
+
+  create_table 'dummy_shadowables' do |t|
+    t.timestamps(null: false)
   end
 
   create_table 'takamaru_commit_logs' do |t|

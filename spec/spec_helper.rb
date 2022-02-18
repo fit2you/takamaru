@@ -108,17 +108,12 @@ RSpec.configure do |config|
 end
 
 ENV['HURRICANE_BASE_URI'] = 'http://hurricane:3000'
-ENV['RAILS_ENV'] = 'test'
 
-require 'active_job'
-require 'active_record'
 require 'database_cleaner/active_record'
 require 'debug'
 require 'factory_bot'
 require 'httparty'
-require 'rails'
 require 'set'
-require 'takamaru'
 require 'vcr'
 
 USED_CASSETTES = Set.new

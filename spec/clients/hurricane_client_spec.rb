@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 RSpec.describe(HurricaneClient) do
   describe '.insurance_company' do

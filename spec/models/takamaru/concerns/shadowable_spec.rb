@@ -1,35 +1,35 @@
 require 'rails_helper'
 
 RSpec.describe(Takamaru::Shadowable) do
-  let(:dummy_client) { DummyClient }
-  let(:dummy_model) { DummyModel }
+  let(:dummy_client_class) { DummyClient }
+  let(:dummy_shadowable_class) { DummyShadowable }
 
   it('has shadow attributes') do
-    expect(dummy_model.shadow_attributes).to(eq(%i[attribute_1 attribute_2]))
+    expect(dummy_shadowable_class.shadow_attributes).to(eq(%i[attribute_1 attribute_2]))
   end
 
   it('has shadow client') do
-    expect(dummy_model.instance_variable_get(:@shadow_client)).to(eq(DummyClient))
-    expect(dummy_model.instance_variable_get(:@shadow_finder_method)).to(eq(:dummy_finder_method))
-    expect(dummy_model.instance_variable_get(:@shadow_finder_by_method)).to(eq(:dummy_finder_by_method))
+    expect(dummy_shadowable_class.instance_variable_get(:@shadow_client)).to(eq(dummy_client_class))
+    expect(dummy_shadowable_class.instance_variable_get(:@shadow_finder_method)).to(eq(:dummy_finder_method))
+    expect(dummy_shadowable_class.instance_variable_get(:@shadow_finder_by_method)).to(eq(:dummy_finder_by_method))
   end
 
   describe 'self.find_or_upsert_from_remote!' do
     describe 'with an existing record' do
       it('calls find once') do
-        expect(dummy_model).to(receive(:find).once.and_return(dummy_model.new))
-        expect(dummy_model).to_not(receive(:upsert_from_response!))
+        expect(dummy_shadowable_class).to(receive(:find).once.and_return(dummy_shadowable_class.new))
+        expect(dummy_shadowable_class).to_not(receive(:upsert_from_response!))
 
-        dummy_model.find_or_upsert_from_remote!(42)
+        dummy_shadowable_class.find_or_upsert_from_remote!(42)
       end
     end
 
     describe 'with an unknown local record' do
       it('calls upsert_from_response! once') do
-        expect(dummy_model).to(receive(:find).once)
-        expect(dummy_model).to(receive(:upsert_from_response!).once)
+        expect(dummy_shadowable_class).to(receive(:find).once)
+        expect(dummy_shadowable_class).to(receive(:upsert_from_response!).once)
 
-        dummy_model.find_or_upsert_from_remote!(42)
+        dummy_shadowable_class.find_or_upsert_from_remote!(42)
       end
     end
   end
@@ -37,19 +37,19 @@ RSpec.describe(Takamaru::Shadowable) do
   describe 'self.find_or_upsert_from_remote_by_attribute!' do
     describe 'with an existing record' do
       it('calls find once') do
-        expect(dummy_model).to(receive(:find_by).once.and_return(dummy_model.new))
-        expect(dummy_model).to_not(receive(:upsert_from_response!))
+        expect(dummy_shadowable_class).to(receive(:find_by).once.and_return(dummy_shadowable_class.new))
+        expect(dummy_shadowable_class).to_not(receive(:upsert_from_response!))
 
-        dummy_model.find_or_upsert_from_remote_by_attribute!(:value)
+        dummy_shadowable_class.find_or_upsert_from_remote_by_attribute!(:value)
       end
     end
 
     describe 'with an unknown local record' do
       it('calls upsert_from_response! once') do
-        expect(dummy_model).to(receive(:find_by).once)
-        expect(dummy_model).to(receive(:upsert_from_response!).once)
+        expect(dummy_shadowable_class).to(receive(:find_by).once)
+        expect(dummy_shadowable_class).to(receive(:upsert_from_response!).once)
 
-        dummy_model.find_or_upsert_from_remote_by_attribute!(:value)
+        dummy_shadowable_class.find_or_upsert_from_remote_by_attribute!(:value)
       end
     end
   end
@@ -59,22 +59,22 @@ RSpec.describe(Takamaru::Shadowable) do
     let(:response_body) do
       { data: {
         id: 42,
-        type: 'dummyModels',
+        type: 'dummyShadowableModels',
         attributes: {},
       } }.to_json
     end
 
-    it('returns a new dummy_model') do
+    it('returns a new dummy_shadowable_class') do
       allow(response).to(receive(:parsed_response).and_return(JSON.parse(response_body)))
-      expect(dummy_model.upsert_from_response!(response)).to(be_a(dummy_model))
+      expect(dummy_shadowable_class.upsert_from_response!(response)).to(be_a(dummy_shadowable_class))
     end
   end
 
   describe 'self.upsert_from_remote_by_attribute!' do
     it('calls upsert_from_remote_by! once') do
-      expect(dummy_model).to(receive(:upsert_from_remote_by!).once)
+      expect(dummy_shadowable_class).to(receive(:upsert_from_remote_by!).once)
 
-      dummy_model.upsert_from_remote_by_attribute!(:value)
+      dummy_shadowable_class.upsert_from_remote_by_attribute!(:value)
     end
   end
 end
