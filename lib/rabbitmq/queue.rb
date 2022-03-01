@@ -1,4 +1,4 @@
-module RabbitMQ
+module Rabbitmq
   class Queue
     attr_reader :channel, :exchange, :name
 
@@ -6,7 +6,7 @@ module RabbitMQ
       @exchange_name = exchange_name
       @mutex = Mutex.new
       @name = [Takamaru.rails_application_name, consumer_name].join('.')
-      @options = Rails.application.config_for(:rabbit_m_q)
+      @options = Rails.application.config_for(:rabbitmq)
     end
 
     def subscribe(&block)

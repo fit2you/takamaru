@@ -5,7 +5,7 @@ module Takamaru
         ids = []
         begin
           CommitLog.find_each do |commit_log|
-            RabbitMQ::Publisher.new(commit_log.exchange_name).publish(commit_log.payload.to_json)
+            Rabbitmq::Publisher.new(commit_log.exchange_name).publish(commit_log.payload.to_json)
             ids << commit_log.id
           end
         ensure

@@ -1,15 +1,15 @@
-module RabbitMQ
+module Rabbitmq
   class Publisher
     attr_reader :exchange, :channel
 
     def initialize(exchange_name)
       @exchange_name = exchange_name
-      @options = Rails.application.config_for(:rabbit_mq)
+      @options = Rails.application.config_for(:rabbitmq)
     end
 
     def publish(message)
       ensure_connection
-      Rails.logger.debug("[RabbitMQ] Publishing message: #{message} to #{exchange.name}")
+      Rails.logger.debug("[Rabbitmq] Publishing message: #{message} to #{exchange.name}")
       exchange.publish(message)
     end
 
