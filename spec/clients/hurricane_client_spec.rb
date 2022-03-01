@@ -1,13 +1,13 @@
 require 'rails_helper'
 
-RSpec.describe(HurricaneClient) do
+RSpec.describe(Takamaru::HurricaneClient) do
   describe '.insurance_company' do
     describe 'with an existing insurance company' do
       let(:id) { 42 }
 
       it 'returns the response' do
         VCR.use_cassette("hurricane_client-insurance_company-#{id}") do
-          response = HurricaneClient.insurance_company(id)
+          response = Takamaru::HurricaneClient.insurance_company(id)
           expect(response).to(be_a(HTTParty::Response))
         end
       end
@@ -19,7 +19,7 @@ RSpec.describe(HurricaneClient) do
       it 'raises a Takamaru::RecordNotFound' do
         VCR.use_cassette("hurricane_client-insurance_company-#{id}") do
           expect do
-            HurricaneClient.insurance_company(id)
+            Takamaru::HurricaneClient.insurance_company(id)
           end.to(raise_error(Takamaru::RecordNotFound))
         end
       end
@@ -33,7 +33,7 @@ RSpec.describe(HurricaneClient) do
 
       it 'returns the response' do
         VCR.use_cassette("hurricane_client-insurance_company_by-#{attribute}-#{value.underscore}") do
-          response = HurricaneClient.insurance_company_by(attribute, value)
+          response = Takamaru::HurricaneClient.insurance_company_by(attribute, value)
           expect(response).to(be_a(HTTParty::Response))
         end
       end
@@ -46,7 +46,7 @@ RSpec.describe(HurricaneClient) do
       it 'raises a Takamaru::RecordNotFound' do
         VCR.use_cassette("hurricane_client-insurance_company_by-#{attribute}-#{value.underscore}") do
           expect do
-            HurricaneClient.insurance_company_by(attribute, value)
+            Takamaru::HurricaneClient.insurance_company_by(attribute, value)
           end.to(raise_error(Takamaru::RecordNotFound))
         end
       end
@@ -59,7 +59,7 @@ RSpec.describe(HurricaneClient) do
 
       it 'returns the response' do
         VCR.use_cassette("hurricane_client-user-#{id}") do
-          response = HurricaneClient.user(id)
+          response = Takamaru::HurricaneClient.user(id)
           expect(response).to(be_a(HTTParty::Response))
         end
       end
@@ -71,7 +71,7 @@ RSpec.describe(HurricaneClient) do
       it 'raises a Takamaru::RecordNotFound' do
         VCR.use_cassette("hurricane_client-user-#{id}") do
           expect do
-            HurricaneClient.user(id)
+            Takamaru::HurricaneClient.user(id)
           end.to(raise_error(Takamaru::RecordNotFound))
         end
       end

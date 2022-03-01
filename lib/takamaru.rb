@@ -1,5 +1,5 @@
-require 'app/clients/application_client'
-require 'app/clients/hurricane_client'
+require 'app/clients/takamaru/application_client'
+require 'app/clients/takamaru/hurricane_client'
 require 'app/consumers/takamaru/application_consumer'
 require 'app/consumers/takamaru/shadow_model_consumer'
 require 'app/jobs/takamaru/commit_log_miner_job'
