@@ -26,7 +26,7 @@ module Takamaru
     end
 
     def log_commit(event)
-      exchange_name = "#{Rails.application.class.parent_name.underscore}_#{self.class.name.tableize}"
+      exchange_name = "#{Takamaru.rails_application_name}.#{self.class.name.tableize}"
       Takamaru::CommitLog.create!(exchange_name: exchange_name, payload: { id: id, event: event })
     end
 

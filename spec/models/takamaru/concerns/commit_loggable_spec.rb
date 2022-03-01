@@ -55,7 +55,7 @@ RSpec.describe(Takamaru::CommitLoggable) do
 
   describe('.log_commit') do
     let(:rails_application_name) { 'RailsApplication' }
-    let(:exchange_name) { "#{rails_application_name.underscore}_#{dummy_commit_loggable.class.name.tableize}" }
+    let(:exchange_name) { "#{rails_application_name.underscore}.#{dummy_commit_loggable.class.name.tableize}" }
     let(:payload) { { id: dummy_commit_loggable.id, event: :create } }
 
     it('enwueues Takamaru::CommitLogMinerJob') do
