@@ -4,6 +4,7 @@ SimpleCov.start do
   add_filter '/spec/'
 
   add_group 'Clients', 'lib/app/clients'
+  add_group 'Consumers', 'lib/app/consumers'
   add_group 'Generators', 'lib/generators'
   add_group 'Jobs', 'lib/app/jobs'
   add_group 'Models', 'lib/app/models'

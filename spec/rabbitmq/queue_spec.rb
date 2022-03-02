@@ -11,7 +11,7 @@ RSpec.describe(Rabbitmq::Queue) do
     allow(Rails.application).to(receive('class')).and_return(double(name: '', parent_name: rails_application_name))
   end
 
-  describe('#new') do
+  describe('.new') do
     it('initializes a new instance') do
       expect(queue).to(be_a(described_class))
       expect(queue.instance_variable_get(:@exchange_name)).to(eq(exchange_name))

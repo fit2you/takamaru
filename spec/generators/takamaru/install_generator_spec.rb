@@ -16,8 +16,8 @@ RSpec.describe(Takamaru::InstallGenerator) do
     prepare_destination
   end
 
-  context 'when a migration does not exist' do
-    it "generates a migration for creating the 'takamaru_commit_logs' table" do
+  context 'when the migrations do not exist' do
+    it 'generates the migrations for creating the takamaru_* tables' do
       expected_parent_class = lambda {
         old_school = 'ActiveRecord::Migration'
         ar_version = ActiveRecord::VERSION
@@ -32,9 +32,26 @@ RSpec.describe(Takamaru::InstallGenerator) do
                 contains('class CreateTakamaruCommitLogs < ' + expected_parent_class)
                 contains('def change')
                 contains('create_table :takamaru_commit_logs do |t|')
-                contains('  t.string :exchange_name, null: false')
-                contains('  t.json :payload, null: false')
-                contains('  t.timestamps null: false')
+                contains('  t.string(:exchange_name, null: false)')
+                contains('  t.json(:payload, null: false)')
+                contains('  t.timestamps')
+              end
+            end
+          end
+        end
+      )
+
+      expect(destination_root).to(
+        have_structure do
+          directory('db') do
+            directory('migrate') do
+              migration('create_takamaru_unhandled_message_logs') do
+                contains('class CreateTakamaruUnhandledMessageLogs < ' + expected_parent_class)
+                contains('def change')
+                contains('create_table :takamaru_unhandled_message_logs do |t|')
+                contains('  t.string(:consumer, null: false)')
+                contains('  t.string(:payload, null: false)')
+                contains('  t.timestamps')
               end
             end
           end

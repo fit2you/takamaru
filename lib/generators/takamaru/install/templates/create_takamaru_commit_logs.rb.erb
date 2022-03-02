@@ -1,9 +1,9 @@
 class CreateTakamaruCommitLogs < ActiveRecord::Migration<%= migration_version %>
   def change
     create_table :takamaru_commit_logs do |t|
-      t.string :exchange_name, null: false
-      t.json :payload, null: false
-      t.timestamps null: false
+      t.string(:exchange_name, null: false)
+      t.json(:payload, null: false)
+      t.timestamps
     end
   end
 end

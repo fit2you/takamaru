@@ -1,7 +1,5 @@
-require 'app/models/takamaru/application_model'
-
 module Takamaru
-  class CommitLog < ApplicationModel
+  class CommitLog < ApplicationRecord
     validates :exchange_name, presence: true
     validates :payload, presence: true
   end
