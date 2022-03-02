@@ -8,8 +8,8 @@ Messages gem for Sasori microservices.
 
 - This workspace has **extension reccomendations** for Visual Studio Code; please, install all of them at the first run.
 - Also, open the folder `/workspace/takamaru` at the first run.
-- Then setup git flow with the following command: `git flow init -f -d --bugfix bugfix/ --feature feature/ --hotfix hotfix/ --release release/ --support support/ --tag ''`.
 - Tell `git` where to find the project shared hooks: `git config core.hooksPath .githooks`.
+- Then setup git flow with the following command: `git flow init -f -d --bugfix bugfix/ --feature feature/ --hotfix hotfix/ --release release/ --support support/ --tag ''`.
 - Run `bundle` to install all the gems.
 
 ## Generators
