@@ -1,9 +1,9 @@
 class DummyClient < Takamaru::ApplicationClient
   class << self
-    def dummy_shadowable(id)
+    def dummy(id)
     end
 
-    def dummy_shadowable_by(attribute, value)
+    def dummy_by(attribute, value)
     end
   end
 end

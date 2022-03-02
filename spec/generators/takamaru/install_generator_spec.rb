@@ -31,7 +31,7 @@ RSpec.describe(Takamaru::InstallGenerator) do
               migration('create_takamaru_commit_logs') do
                 contains('class CreateTakamaruCommitLogs < ' + expected_parent_class)
                 contains('def change')
-                contains('create_table :takamaru_commit_logs do |t|')
+                contains('create_table(:takamaru_commit_logs) do |t|')
                 contains('  t.string(:exchange_name, null: false)')
                 contains('  t.json(:payload, null: false)')
                 contains('  t.timestamps')
@@ -48,7 +48,7 @@ RSpec.describe(Takamaru::InstallGenerator) do
               migration('create_takamaru_unhandled_message_logs') do
                 contains('class CreateTakamaruUnhandledMessageLogs < ' + expected_parent_class)
                 contains('def change')
-                contains('create_table :takamaru_unhandled_message_logs do |t|')
+                contains('create_table(:takamaru_unhandled_message_logs) do |t|')
                 contains('  t.string(:consumer, null: false)')
                 contains('  t.string(:payload, null: false)')
                 contains('  t.timestamps')

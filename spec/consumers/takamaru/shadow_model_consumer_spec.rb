@@ -1,8 +1,7 @@
 require 'rails_helper'
 
-RSpec.describe(Takamaru::ShadowModelConsumer) do
-  let(:consumer) { described_class.new(exchange_name) }
-  let(:exchange_name) { 'exchange_name' }
+RSpec.describe(ShadowDummiesConsumer) do
+  let(:consumer) { described_class.new }
 
   before do
     allow(Rails.application).to(receive('config_for').with(:rabbitmq).and_return({ 'hostname' => 'localhost' }))
@@ -26,6 +25,18 @@ RSpec.describe(Takamaru::ShadowModelConsumer) do
       expect(consumer.queue).to(receive('subscribe')).and_call_original
 
       consumer.consume
+    end
+  end
+
+  %i[create destroy update].each do |event|
+    describe("#consume_#{event}") do
+      let(:dummy) { create(:dummy) }
+
+      it("enqueues a job to #{event} a shadow model") do
+        expect(ShadowDummiesJob).to(receive('perform_later').once.with(dummy.id, event.to_s))
+
+        consumer.send(:"consume_#{event}", dummy.id)
+      end
     end
   end
 end

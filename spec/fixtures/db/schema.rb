@@ -4,7 +4,7 @@ ActiveRecord::Schema.define(version: 20200904110000) do
     t.timestamps(null: false)
   end
 
-  create_table 'dummy_shadowables' do |t|
+  create_table 'dummies' do |t|
     t.timestamps(null: false)
   end
 
