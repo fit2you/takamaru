@@ -4,6 +4,7 @@ ENV['RAILS_ENV'] ||= 'test'
 require 'active_job'
 require 'active_record'
 require 'rails'
+require 'rollbar'
 
 require 'takamaru'
 

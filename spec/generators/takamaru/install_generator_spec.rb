@@ -50,7 +50,7 @@ RSpec.describe(Takamaru::InstallGenerator) do
                 contains('def change')
                 contains('create_table(:takamaru_unhandled_message_logs) do |t|')
                 contains('  t.string(:consumer, null: false)')
-                contains('  t.string(:payload, null: false)')
+                contains('  t.json(:payload, null: false)')
                 contains('  t.timestamps')
               end
             end
