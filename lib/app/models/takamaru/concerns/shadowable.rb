@@ -7,7 +7,9 @@ module Takamaru
 
       def has_shadow_attributes(*attributes)
         @shadow_attributes = attributes
-        # TODO: updates to shadow_attributes should be forbidden
+        instance_eval do
+          @shadow_attributes.each { |attribute| define_instance_writer(attribute) }
+        end
       end
 
       def has_shadow_client(client)
@@ -15,6 +17,19 @@ module Takamaru
         name_underscored = name.underscore
         @shadow_finder_method = name_underscored
         @shadow_finder_by_method = "#{name_underscored}_by"
+      end
+
+      private
+
+      def define_instance_writer(attribute)
+        define_method("#{attribute}=") do |value|
+          if persisted? && !shadow_attributes_rewritable?
+            raise ActiveRecord::ReadOnlyRecord,
+              "#{self.class.name}'s shadow attribute '#{attribute}' should not be changed manually!"
+          end
+
+          super(value)
+        end
       end
     end
 
@@ -32,8 +47,10 @@ module Takamaru
 
         def initialize_record(id, attributes)
           record = find_or_initialize_by(id: id)
-          record.assign_attributes(attributes)
-          record.save!
+          record.allow_shadow_attributes_rewriting do |instance|
+            instance.assign_attributes(attributes)
+            instance.save!
+          end
 
           record
         end
@@ -78,6 +95,16 @@ module Takamaru
         def upsert_from_remote_by!(attribute, value)
           upsert_from_response!(@shadow_client.send(@shadow_finder_by_method, attribute, value))
         end
+      end
+
+      def allow_shadow_attributes_rewriting(&block)
+        @shadow_attributes_rewritable = true
+        yield self
+        @shadow_attributes_rewritable = false
+      end
+
+      def shadow_attributes_rewritable?
+        @shadow_attributes_rewritable
       end
     end
   end

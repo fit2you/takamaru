@@ -3,6 +3,7 @@ ENV['RAILS_ENV'] ||= 'test'
 
 require 'active_job'
 require 'active_record'
+require 'byebug'
 require 'rails'
 require 'rollbar'
 
@@ -15,3 +16,5 @@ ActiveRecord::Schema.verbose = false
 load 'fixtures/db/schema.rb'
 
 Dir['spec/support/**/*.rb'].each { |f| require_relative(f.gsub(%r{^spec/}, '')) }
+
+RSpec::Matchers.define_negated_matcher(:not_change, :change)

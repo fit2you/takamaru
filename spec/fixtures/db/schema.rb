@@ -5,6 +5,8 @@ ActiveRecord::Schema.define(version: 20200904110000) do
   end
 
   create_table 'dummies' do |t|
+    t.string(:attribute_1)
+    t.string(:attribute_2)
     t.timestamps(null: false)
   end
 

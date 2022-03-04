@@ -26,7 +26,6 @@ module Takamaru
       parsed_payload = JSON.parse(payload)
       event = parsed_payload.fetch('event')
       id = parsed_payload.fetch('id')
-      puts "#{class_name} consuming #{event} for #{id}"
       send("consume_#{event}", id)
     end
   end

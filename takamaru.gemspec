@@ -18,8 +18,8 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency('bundler-audit')
   spec.add_development_dependency('bunny')
+  spec.add_development_dependency('byebug')
   spec.add_development_dependency('database_cleaner-active_record')
-  spec.add_development_dependency('debug')
   spec.add_development_dependency('factory_bot')
   spec.add_development_dependency('generator_spec')
   spec.add_development_dependency('rollbar')
