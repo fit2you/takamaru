@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe(ShadowDummiesConsumer) do
+RSpec.describe(DummiesConsumer) do
   let(:consumer) { described_class.new }
   let(:dummy) { create(:dummy) }
 
@@ -18,7 +18,7 @@ RSpec.describe(ShadowDummiesConsumer) do
   %i[create destroy update].each do |event|
     describe("#consume_#{event}") do
       it("enqueues a job to #{event} a shadow model") do
-        expect(ShadowDummiesJob).to(receive('perform_later').once.with(dummy.id, event.to_s))
+        expect(DummiesConsumerJob).to(receive('perform_later').once.with(dummy.id, event.to_s))
 
         consumer.send(:"consume_#{event}", dummy.id)
       end

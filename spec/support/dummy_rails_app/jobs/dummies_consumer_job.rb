@@ -1,4 +1,4 @@
-class ShadowDummiesJob < ActiveJob::Base
+class DummiesConsumerJob < ActiveJob::Base
   attr_reader :id
 
   def perform(id, event)

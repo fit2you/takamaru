@@ -13,7 +13,7 @@ module Takamaru
 
     %i[create destroy update].each do |event|
       define_method("consume_#{event}") do |id|
-        job_class = class_name.gsub('Consumer', 'Job').constantize
+        job_class = "#{class_name}Job".constantize
         job_class.perform_later(id, event.to_s)
       end
     end
