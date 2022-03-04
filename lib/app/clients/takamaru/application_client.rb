@@ -22,7 +22,6 @@ module Takamaru
         when 404
           raise Takamaru::RecordNotFound, message
         else
-          # FIXME: better handling errors
           raise Takamaru::Error, message
         end
       end
