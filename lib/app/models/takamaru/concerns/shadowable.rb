@@ -3,7 +3,7 @@ module Takamaru
     extend ActiveSupport::Concern
 
     module ClassMethods
-      attr_reader :shadow_attributes
+      attr_reader :shadow_attributes, :shadow_client
 
       def has_shadow_attributes(*attributes)
         @shadow_attributes = attributes
