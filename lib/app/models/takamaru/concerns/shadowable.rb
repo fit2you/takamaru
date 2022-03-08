@@ -3,7 +3,7 @@ module Takamaru
     extend ActiveSupport::Concern
 
     module ClassMethods
-      attr_reader :shadow_attributes, :shadow_client
+      attr_reader :shadow_client
 
       def has_shadow_attributes(*attributes)
         @shadow_attributes = attributes
@@ -17,6 +17,10 @@ module Takamaru
         name_underscored = name.underscore
         @shadow_finder_method = name_underscored
         @shadow_finder_by_method = "#{name_underscored}_by"
+      end
+
+      def shadow_attributes
+        @shadow_attributes ||= []
       end
 
       private
