@@ -1,6 +1,6 @@
 module Rabbitmq
   class Queue
-    attr_reader :channel, :exchange, :name
+    attr_reader :channel, :exchange, :exchange_name, :name
 
     def initialize(exchange_name, consumer_name)
       @exchange_name = exchange_name
