@@ -87,8 +87,7 @@ module Takamaru
         def respond_to_missing?(method_name, include_private = false)
           string_method_name = method_name.to_s
 
-          string_method_name.start_with?('find_or_upsert_from_remote_by_') ||
-            string_method_name.start_with?('upsert_from_remote_by_') ||
+          string_method_name.start_with?('find_or_upsert_from_remote_by_', 'upsert_from_remote_by_') ||
             super
         end
 

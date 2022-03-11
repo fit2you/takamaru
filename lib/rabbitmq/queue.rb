@@ -14,7 +14,7 @@ module Rabbitmq
       queue = channel.queue(name)
       queue.bind(exchange)
       queue.subscribe(block: true) do |_delivery_info, _properties, payload|
-        block.call(payload)
+        yield(payload)
       end
     rescue Interrupt => _e
       channel.close

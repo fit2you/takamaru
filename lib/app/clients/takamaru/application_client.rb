@@ -16,7 +16,7 @@ module Takamaru
       end
 
       def handle_errors(response, method, path)
-        message = "#{name}##{caller[1][/`.*'/][1..-2]}: #{method.upcase} #{path}"
+        message = "#{name}##{caller(2..2).first[/`.*'/][1..-2]}: #{method.upcase} #{path}"
 
         case response.code
         when 404
