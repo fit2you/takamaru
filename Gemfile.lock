@@ -238,6 +238,9 @@ GEM
       unicode-display_width (>= 1.4.0, < 3.0)
     rubocop-ast (1.16.0)
       parser (>= 3.1.1.0)
+    rubocop-performance (1.13.3)
+      rubocop (>= 1.7.0, < 2.0)
+      rubocop-ast (>= 0.4.0)
     rubocop-shopify (2.4.0)
       rubocop (~> 1.24)
     ruby-progressbar (1.11.0)
@@ -302,6 +305,7 @@ DEPENDENCIES
   rollbar
   rspec-rails
   rubocop
+  rubocop-performance
   rubocop-shopify
   rubycritic
   simplecov

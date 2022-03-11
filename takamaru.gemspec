@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('rollbar')
   spec.add_development_dependency('rspec-rails')
   spec.add_development_dependency('rubocop')
+  spec.add_development_dependency('rubocop-performance')
   spec.add_development_dependency('rubocop-shopify')
   spec.add_development_dependency('rubycritic')
   spec.add_development_dependency('simplecov')

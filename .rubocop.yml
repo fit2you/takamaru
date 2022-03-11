@@ -1,8 +1,15 @@
+require: rubocop-performance
+
 inherit_gem:
   rubocop-shopify: rubocop.yml
 
+AllCops:
+  NewCops: enable
+
 Style/FrozenStringLiteralComment:
   Enabled: false
+Style/HashSyntax:
+  EnforcedShorthandSyntax: never
 Style/StringLiterals:
   EnforcedStyle: single_quotes
 Style/StringLiteralsInInterpolation:
