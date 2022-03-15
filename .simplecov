@@ -7,6 +7,8 @@ SimpleCov.start do
   add_group 'Jobs', 'lib/app/jobs'
   add_group 'Models', 'lib/app/models'
 
+  enable_coverage :branch
+
   track_files '{lib}/**/*.rb'
 end
 SimpleCov.minimum_coverage(ENV['DB'] == 'postgres' ? 97.3 : 92.4)
