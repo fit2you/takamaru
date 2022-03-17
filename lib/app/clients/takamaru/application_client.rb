@@ -3,7 +3,7 @@ module Takamaru
     include HTTParty
 
     default_timeout 120
-    debug_output($stdout) if Rails.env.development?
+    debug_output($stdout) if ENV.fetch('DEBUG', false)
 
     class << self
       private
