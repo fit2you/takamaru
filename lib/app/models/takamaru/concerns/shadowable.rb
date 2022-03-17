@@ -77,9 +77,9 @@ module Takamaru
           data = response.parsed_response.fetch('data').with_indifferent_access
 
           origin_id = data[:id]
-          origin_attributes = data[:attributes].deep_transform_keys do |key|
+          origin_attributes = data[:attributes]&.deep_transform_keys do |key|
             key.to_s.underscore
-          end.slice(*@shadow_attributes)
+          end&.slice(*@shadow_attributes) || {}
 
           initialize_record(origin_id, origin_attributes)
         end
