@@ -26,6 +26,7 @@ module Takamaru
 
     def migration_version
       return '' if ::ActiveRecord::VERSION::MAJOR < 5
+
       format(
         '[%d.%d]',
         ActiveRecord::VERSION::MAJOR,
