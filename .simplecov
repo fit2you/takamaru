@@ -1,4 +1,4 @@
-SimpleCov.start do
+SimpleCov.configure do
   add_filter '/spec/'
 
   add_group 'Clients', 'lib/app/clients'
@@ -7,6 +7,7 @@ SimpleCov.start do
   add_group 'Jobs', 'lib/app/jobs'
   add_group 'Models', 'lib/app/models'
 
+  coverage_dir 'tmp/simplecov'
   enable_coverage :branch
 
   track_files '{lib}/**/*.rb'
