@@ -1,26 +1,20 @@
-require 'rubycritic/rake_task'
-
 namespace :code do
   desc 'Checks the quality of code and generate reports'
   task :quality do
     puts
     puts '== Patch-level verification for bundler '.ljust(80, '=')
     puts
-    system 'bundle-audit update && bundle-audit'
+    abort unless system('bundle-audit update && bundle-audit')
+
     puts
+    puts '== Checking for security vulnerabilities '.ljust(80, '=')
+    abort unless system('brakeman lib -q --color')
+
     puts '== Quality report generation '.ljust(80, '=')
     puts
-    Rake.application.invoke_task('code:rubycritic')
-    puts
-  end
-
-  RubyCritic::RakeTask.new do |task|
-    task.name = 'rubycritic'
-
-    task.paths = FileList.new(
-      'lib/**/*.rb',
-    )
-
-    task.options = ''
+    paths = FileList.new(
+      'lib/**/*.rb'
+    ).join(' ')
+    abort unless system("rubycritic #{paths}")
   end
 end
