@@ -14,6 +14,10 @@ module Takamaru
       def user(id)
         do_request(:get, "/api/v2/users/#{id}", options)
       end
+
+      def city(id)
+        do_request(:get, "/api/v2/cities/#{id}", options)
+      end
     end
   end
 end
