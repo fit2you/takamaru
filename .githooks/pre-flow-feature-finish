@@ -1,0 +1,18 @@
+#!/bin/sh
+
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+RED='\033[0;31m'
+
+echo "${CYAN}[Code quality][Info] Checking code quality...${NC}"
+
+rake code:quality
+
+if [ $? -ne 0 ]; then
+  echo "${RED}[Code quality][Error] Fix the issues and then try to finish the feature again.${NC}\r\n"
+  exit 1
+else
+  echo "${GREEN}[Code quality][Success] Code quality check successful.${NC}\r\n"
+  exit 0
+fi

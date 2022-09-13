@@ -1,0 +1,5 @@
+---
+formats:
+  - html
+no_browser: true
+minimum_score: 92
