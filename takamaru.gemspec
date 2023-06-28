@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir['lib/**/*', 'LICENSE'].reject { |f| File.directory?(f) }
   spec.name = 'takamaru'
-  spec.required_ruby_version = ['>= 2.4.10', '< 3.2']
+  spec.required_ruby_version = ['>= 2.4.10']
   spec.version = Takamaru::VERSION
 
   spec.add_runtime_dependency('httparty', ['~> 0.20.0'])
