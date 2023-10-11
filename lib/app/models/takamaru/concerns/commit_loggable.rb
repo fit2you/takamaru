@@ -9,11 +9,13 @@ module Takamaru
       after_create :publish_create_message
       after_destroy :publish_destroy_message
       after_update :publish_update_message
-    end
 
-    class << self
-      def override_takamaru_class_name(class_name)
-        @class_name = class_name
+      class_variable_set(:@@takamaru_class_name, self.name.tableize)
+
+      class << self
+        def override_takamaru_class_name(class_name)
+          class_variable_set(:@@takamaru_class_name, class_name)
+        end
       end
     end
 
@@ -32,12 +34,8 @@ module Takamaru
     end
 
     def log_commit(event)
-      exchange_name = "#{Takamaru.rails_application_name}.#{class_name}"
+      exchange_name = "#{Takamaru.rails_application_name}.#{self.class.class_variable_get(:@@takamaru_class_name)}"
       Takamaru::CommitLog.create!(exchange_name: exchange_name, payload: { id: id, event: event })
-    end
-
-    def class_name
-      @@class_name || self.class.name.tableize
     end
 
     def mine_commit_logs
