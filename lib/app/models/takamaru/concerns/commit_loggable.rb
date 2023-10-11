@@ -13,7 +13,7 @@ module Takamaru
 
     class << self
       def override_takamaru_class_name(class_name)
-        @@class_name = class_name
+        @class_name = class_name
       end
     end
 
