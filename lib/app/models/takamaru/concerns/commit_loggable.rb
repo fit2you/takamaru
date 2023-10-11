@@ -11,8 +11,10 @@ module Takamaru
       after_update :publish_update_message
     end
 
-    def override_takamaru_class_name(class_name)
-      @class_name = class_name
+    class << self
+      def override_takamaru_class_name(class_name)
+        @@class_name = class_name
+      end
     end
 
     def without_commit_log(&block)
@@ -35,7 +37,7 @@ module Takamaru
     end
 
     def class_name
-      @class_name || self.class.name.tableize
+      @@class_name || self.class.name.tableize
     end
 
     def mine_commit_logs
