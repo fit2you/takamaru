@@ -1,3 +1,4 @@
+# rubocop:disable Style/ClassVars
 module Takamaru
   module CommitLoggable
     extend ActiveSupport::Concern
@@ -10,7 +11,7 @@ module Takamaru
       after_destroy :publish_destroy_message
       after_update :publish_update_message
 
-      class_variable_set(:@@takamaru_class_name, self.name.tableize)
+      class_variable_set(:@@takamaru_class_name, name.tableize)
 
       class << self
         def override_takamaru_class_name(class_name)
@@ -43,3 +44,5 @@ module Takamaru
     end
   end
 end
+
+# rubocop:enable Style/ClassVars
