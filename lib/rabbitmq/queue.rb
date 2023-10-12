@@ -18,6 +18,7 @@ module Rabbitmq
       end
     rescue Interrupt => _e
       channel.close
+      sleep(2) # NOTE: that should be a safe amount to ensure the yield submitting work
     end
 
     private
