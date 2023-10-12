@@ -13,10 +13,14 @@ module Rabbitmq
       ensure_connection!
       queue = channel.queue(name)
       queue.bind(exchange)
+      # NOTE: the `block: true` attach the yield processing on the main Thread, meaning that any other operation is
+      # managed synchronously
       queue.subscribe(block: true) do |_delivery_info, _properties, payload|
         yield(payload)
       end
     rescue Interrupt => _e
+      # NOTE: when the `Interrupt` is catched here, it is blocking compared to yield, so there is no overlapping and it
+      # is safe to close the channel and get out
       channel.close
     end
 
