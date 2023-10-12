@@ -18,7 +18,7 @@ module Rabbitmq
       queue.subscribe(block: true) do |_delivery_info, _properties, payload|
         yield(payload)
       end
-    rescue Interrupt => _e
+    rescue Interrupt
       # NOTE: when the `Interrupt` is catched here, it is blocking compared to yield, so there is no overlapping and it
       # is safe to close the channel and get out
       channel.close
