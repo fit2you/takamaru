@@ -30,7 +30,7 @@ module Rabbitmq
     end
 
     def create_bunny_connection
-      Bunny.new(hostname: @options.fetch('hostname'))
+      Bunny.new(hostname: @options.fetch(:hostname))
     end
 
     def ensure_connection
