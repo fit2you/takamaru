@@ -1,5 +1,5 @@
 module Takamaru
-  class CommitLogMinerJob < ApplicationJob
+  class CommitLogMinerJob < ActiveJob::Base
     def perform
       ActiveRecord::Base.transaction do
         ids = []
