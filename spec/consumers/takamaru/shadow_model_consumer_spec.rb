@@ -5,7 +5,10 @@ RSpec.describe(DummiesConsumer) do
   let(:dummy) { create(:dummy) }
 
   before do
-    allow(Rails.application).to(receive('config_for').with(:rabbitmq).and_return({ 'hostname' => 'localhost' }))
+    allow(Rails.application).to(receive('config_for').with(:rabbitmq).and_return({
+      hostname: 'localhost',
+      vhost: '/',
+    }))
   end
 
   describe('.new') do
@@ -27,9 +30,10 @@ RSpec.describe(DummiesConsumer) do
 
   describe('#consume') do
     before do
-      consumer.queue.instance_variable_set(:@options, { hostname: 'localhost' })
-      allow(Bunny).to(receive('new').and_return(double(start: nil,
-        create_channel: double(fanout: nil, queue: double(bind: nil, subscribe: nil)))))
+      allow(Bunny).to(receive('new').and_return(double(
+        start: nil,
+        create_channel: double(fanout: nil, queue: double(bind: nil, subscribe: nil)),
+      )))
     end
 
     context('with a valid payload') do

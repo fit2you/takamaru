@@ -7,7 +7,10 @@ RSpec.describe(RabbitMq::Queue) do
   let(:rails_application_name) { 'rails_application' }
 
   before do
-    allow(Rails.application).to(receive('config_for').with(:rabbitmq).and_return({ 'hostname' => 'localhost' }))
+    allow(Rails.application).to(receive('config_for').with(:rabbitmq).and_return({
+      hostname: 'localhost',
+      vhost: '/',
+    }))
     allow(Rails.application).to(receive('class')).and_return(double(name: '', parent_name: rails_application_name))
   end
 
@@ -21,7 +24,6 @@ RSpec.describe(RabbitMq::Queue) do
 
   describe('#subscribe') do
     before do
-      queue.instance_variable_set(:@options, { hostname: 'localhost' })
       allow(Bunny).to(receive('new').and_return(double(start: nil,
         create_channel: double(fanout: nil, queue: double(bind: nil, subscribe: nil)))))
     end

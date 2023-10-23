@@ -1,5 +1,5 @@
 module RabbitMq
-  class RabbitService
+  class Service
     protected
 
     def initialize

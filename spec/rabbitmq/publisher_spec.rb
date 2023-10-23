@@ -18,7 +18,10 @@ RSpec.describe(RabbitMq::Publisher) do
       allow(bunny_instance).to(receive(:create_channel).and_return(bunny_channel_instance))
       allow(bunny_instance).to(receive(:start).and_return(bunny_instance))
 
-      allow(Rails.application).to(receive('config_for').with(:rabbitmq).and_return({ 'hostname' => 'localhost' }))
+      allow(Rails.application).to(receive('config_for').with(:rabbitmq).and_return({
+        hostname: 'localhost',
+        vhost: '/',
+      }))
     end
 
     it('calls exchange.publish once') do

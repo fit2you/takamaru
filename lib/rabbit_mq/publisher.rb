@@ -1,9 +1,11 @@
+require_relative 'service'
+
 module RabbitMq
   class Publisher < Service
     attr_reader :exchange, :channel
 
     def initialize(exchange_name)
-      super
+      super()
       @exchange_name = exchange_name
     end
 

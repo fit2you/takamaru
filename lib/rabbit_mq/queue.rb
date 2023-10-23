@@ -1,9 +1,11 @@
+require_relative 'service'
+
 module RabbitMq
   class Queue < Service
     attr_reader :channel, :exchange, :exchange_name, :name
 
     def initialize(exchange_name, consumer_name)
-      super
+      super()
       @exchange_name = exchange_name
       @mutex = Mutex.new
       @name = [Takamaru.rails_application_name, consumer_name].join('.')
