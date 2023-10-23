@@ -1,12 +1,12 @@
-module Rabbitmq
-  class Queue
+module RabbitMq
+  class Queue < Service
     attr_reader :channel, :exchange, :exchange_name, :name
 
     def initialize(exchange_name, consumer_name)
+      super
       @exchange_name = exchange_name
       @mutex = Mutex.new
       @name = [Takamaru.rails_application_name, consumer_name].join('.')
-      @options = Rails.application.config_for(:rabbitmq)
     end
 
     def subscribe(&block)
@@ -35,10 +35,6 @@ module Rabbitmq
 
     def connected?
       @bunny&.connected? && channel && exchange
-    end
-
-    def create_bunny_connection
-      Bunny.new(hostname: @options.fetch(:hostname))
     end
 
     def ensure_connection!

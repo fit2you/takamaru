@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe(Rabbitmq::Publisher) do
+RSpec.describe(RabbitMq::Publisher) do
   describe('#publish') do
     let(:bunny_channel_instance) { Bunny::Channel.new(connection, 42) }
     let(:bunny_exchange_instance) { instance_double(Bunny::Exchange) }
@@ -22,7 +22,7 @@ RSpec.describe(Rabbitmq::Publisher) do
     end
 
     it('calls exchange.publish once') do
-      expect(Rails.logger).to(receive(:debug).with("[Rabbitmq] Publishing message: #{message} to #{exchange_name}"))
+      expect(Rails.logger).to(receive(:debug).with("[RabbitMq] Publishing message: #{message} to #{exchange_name}"))
       expect(bunny_exchange_instance).to(receive('publish').with(message).once)
 
       subject.publish(message)

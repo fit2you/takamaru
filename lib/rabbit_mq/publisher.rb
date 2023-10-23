@@ -1,15 +1,15 @@
-module Rabbitmq
-  class Publisher
+module RabbitMq
+  class Publisher < Service
     attr_reader :exchange, :channel
 
     def initialize(exchange_name)
+      super
       @exchange_name = exchange_name
-      @options = Rails.application.config_for(:rabbitmq)
     end
 
     def publish(message)
       ensure_connection
-      Rails.logger.debug("[Rabbitmq] Publishing message: #{message} to #{exchange.name}")
+      Rails.logger.debug("[RabbitMq] Publishing message: #{message} to #{exchange.name}")
       exchange.publish(message)
     end
 
@@ -27,10 +27,6 @@ module Rabbitmq
 
     def connected?
       bunny&.connected? && channel && exchange
-    end
-
-    def create_bunny_connection
-      Bunny.new(hostname: @options.fetch(:hostname))
     end
 
     def ensure_connection

@@ -11,7 +11,7 @@ RSpec.describe(DummiesConsumer) do
   describe('.new') do
     it('initializes a new instance') do
       expect(consumer).to(be_a(described_class))
-      expect(consumer.instance_variable_get(:@queue)).to(be_a(Rabbitmq::Queue))
+      expect(consumer.instance_variable_get(:@queue)).to(be_a(RabbitMq::Queue))
     end
   end
 
@@ -44,7 +44,7 @@ RSpec.describe(DummiesConsumer) do
       let(:payload) { 'invalid' }
 
       before do
-        allow_any_instance_of(Rabbitmq::Queue).to(receive('subscribe') { |&block| block.call(payload) })
+        allow_any_instance_of(RabbitMq::Queue).to(receive('subscribe') { |&block| block.call(payload) })
       end
 
       it('subscribes to the queue') do

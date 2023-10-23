@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe(Rabbitmq::Queue) do
+RSpec.describe(RabbitMq::Queue) do
   let(:consumer_name) { 'consumer_name' }
   let(:exchange_name) { 'exchange_name' }
   let(:queue) { described_class.new(exchange_name, consumer_name) }
