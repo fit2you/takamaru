@@ -13,12 +13,12 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = ['>= 2.4.10']
   spec.version = Takamaru::VERSION
 
+  spec.add_runtime_dependency('bunny')
   spec.add_runtime_dependency('httparty', ['~> 0.21'])
   spec.add_runtime_dependency('rails', ['>= 4.2.7.1', '< 8.0'])
 
   spec.add_development_dependency('brakeman')
   spec.add_development_dependency('bundler-audit')
-  spec.add_development_dependency('bunny')
   spec.add_development_dependency('byebug')
   spec.add_development_dependency('database_cleaner-active_record')
   spec.add_development_dependency('factory_bot')

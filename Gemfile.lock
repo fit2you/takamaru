@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     takamaru (0.0.0)
+      bunny
       httparty (~> 0.21)
       rails (>= 4.2.7.1, < 8.0)
 
@@ -301,7 +302,6 @@ PLATFORMS
 DEPENDENCIES
   brakeman
   bundler-audit
-  bunny
   byebug
   database_cleaner-active_record
   factory_bot
