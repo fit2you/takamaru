@@ -9,6 +9,9 @@ RSpec.describe(RabbitMq::Queue) do
   before do
     allow(Rails.application).to(receive('config_for').with(:rabbitmq).and_return({
       hostname: 'localhost',
+      password: 'guest',
+      port: 5672,
+      username: 'guest',
       vhost: '/',
     }))
     allow(Rails.application).to(receive('class')).and_return(double(name: '', parent_name: rails_application_name))

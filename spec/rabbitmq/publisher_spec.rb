@@ -20,6 +20,9 @@ RSpec.describe(RabbitMq::Publisher) do
 
       allow(Rails.application).to(receive('config_for').with(:rabbitmq).and_return({
         hostname: 'localhost',
+        password: 'guest',
+        port: 5672,
+        username: 'guest',
         vhost: '/',
       }))
     end
