@@ -30,7 +30,7 @@ module Takamaru
 
     %i[create destroy update].each do |event|
       define_method "publish_#{event}_message" do
-        log_commit(event) if !do_not_log_commit && (event != :update || changed?)
+        log_commit(event) unless do_not_log_commit
       end
     end
 
