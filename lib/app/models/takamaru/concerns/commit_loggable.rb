@@ -30,17 +30,17 @@ module Takamaru
 
     %i[create destroy update].each do |event|
       define_method "publish_#{event}_message" do
-        log_commit(event) unless do_not_log_commit
+        log_commit(event) if !do_not_log_commit && (event != :update || changed?)
       end
     end
 
     def log_commit(event)
       exchange_name = "#{Takamaru.rails_application_name}.#{self.class.class_variable_get(:@@takamaru_class_name)}"
-      Takamaru::CommitLog.create!(exchange_name: exchange_name, payload: { id: id, event: event })
+      @commit_log_id = Takamaru::CommitLog.create!(exchange_name: exchange_name, payload: { id: id, event: event }).id
     end
 
     def mine_commit_logs
-      Takamaru::CommitLogMinerJob.perform_later
+      Takamaru::CommitLogMinerJob.perform_later(@commit_log_id)
     end
   end
 end
