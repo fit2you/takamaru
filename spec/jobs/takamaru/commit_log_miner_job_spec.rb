@@ -13,7 +13,7 @@ RSpec.describe(Takamaru::CommitLogMinerJob) do
       expect(RabbitMq::Publisher).to(receive(:new).with(commit_log.exchange_name).once)
       expect(rabbitmq_publisher_instance).to(receive(:publish).with(commit_log.payload.to_json).once)
 
-      expect { Takamaru::CommitLogMinerJob.perform_now }.to(change { Takamaru::CommitLog.count }.by(-1))
+      expect { Takamaru::CommitLogMinerJob.perform_now(commit_log.id) }.to(change { Takamaru::CommitLog.count }.by(-1))
     end
   end
 end

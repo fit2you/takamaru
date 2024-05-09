@@ -60,7 +60,9 @@ RSpec.describe(Takamaru::CommitLoggable) do
 
     it('enwueues Takamaru::CommitLogMinerJob') do
       allow(Rails.application).to(receive('class')).and_return(double(name: '', parent_name: rails_application_name))
-      expect(Takamaru::CommitLog).to(receive(:create!).with(exchange_name: exchange_name, payload: payload).once)
+      expect(Takamaru::CommitLog).to(
+        receive(:create!).with(exchange_name: exchange_name, payload: payload).once.and_return(create(:commit_log)),
+      )
 
       dummy_commit_loggable.send(:log_commit, :create)
     end

@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('rubocop-shopify')
   spec.add_development_dependency('rubycritic')
   spec.add_development_dependency('simplecov')
-  spec.add_development_dependency('sqlite3')
+  spec.add_development_dependency('sqlite3', '~> 1.4')
   spec.add_development_dependency('vcr')
   spec.add_development_dependency('webmock')
 end
