@@ -33,4 +33,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('sqlite3', '~> 1.4')
   spec.add_development_dependency('vcr')
   spec.add_development_dependency('webmock')
+  spec.add_development_dependency('webrick', '~> 1.8.2')
 end
