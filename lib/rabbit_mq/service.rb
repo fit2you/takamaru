@@ -12,6 +12,7 @@ module RabbitMq
         password: @rabbit_options.fetch(:password),
         port: @rabbit_options.fetch(:port),
         username: @rabbit_options.fetch(:username),
+        vhost: @rabbit_options.fetch(:vhost, '/'),
       )
     end
   end
