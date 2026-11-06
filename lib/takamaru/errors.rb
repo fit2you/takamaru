@@ -1,5 +1,5 @@
 module Takamaru
   class Error < StandardError; end
 
-  class RecordNotFound < Error; end
+  class PublishError < Error; end
 end

@@ -1,29 +1,53 @@
-require 'app/clients/takamaru/application_client'
-require 'app/clients/takamaru/hurricane_client'
+require 'active_job'
+require 'active_record'
+require 'bunny'
+require 'rails'
+
+require 'takamaru/configuration'
+require 'takamaru/errors'
+require 'takamaru/json_api_parser'
+require 'takamaru/rabbit_mq/connection'
+require 'takamaru/rabbit_mq/publisher'
+require 'takamaru/rabbit_mq/queue'
+require 'takamaru/relay'
+require 'takamaru/relay_process'
+require 'takamaru/shutdown_signals'
+require 'takamaru/version'
+
 require 'app/consumers/takamaru/application_consumer'
 require 'app/consumers/takamaru/shadow_model_consumer'
-require 'app/jobs/takamaru/commit_log_miner_job'
+require 'app/jobs/takamaru/commit_log_cleanup_job'
+require 'app/jobs/takamaru/commit_log_relay_job'
 require 'app/models/takamaru/application_record'
 require 'app/models/takamaru/commit_log'
 require 'app/models/takamaru/concerns/commit_loggable'
 require 'app/models/takamaru/concerns/shadowable'
-require 'app/models/takamaru/unhandled_message_log'
-require 'bunny'
-require 'rabbit_mq/publisher'
-require 'rabbit_mq/queue'
-require 'takamaru/errors'
-require 'takamaru/version'
+
+require 'takamaru/railtie'
 
 module Takamaru
   class << self
+    def config
+      @config ||= Configuration.new
+    end
+
+    # Takamaru.configure do |config|
+    #   config.relay_batch_size = 500
+    # end
+    def configure
+      yield(config)
+    end
+
     def gem_version
       ::Gem::Version.new(VERSION::STRING)
     end
 
     def rails_application_name
-      klass = Rails.application.class
-      # Rails 6.1 introduced `module_parent` method
-      (klass.respond_to?(:module_parent) ? klass.module_parent.name : klass.parent_name).underscore
+      config.application_name
+    end
+
+    def report_error(error, context = {})
+      config.error_handler.call(error, context)
     end
   end
 end

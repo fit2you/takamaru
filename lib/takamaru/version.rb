@@ -1,6 +1,6 @@
 module Takamaru
   module VERSION
-    MAJOR = 0
+    MAJOR = 1
     MINOR = 0
     TINY = 0
 
@@ -9,8 +9,10 @@ module Takamaru
 
     STRING = [MAJOR, MINOR, TINY, PRE].compact.join('.').freeze
 
-    def self.to_s
-      STRING
+    class << self
+      def to_s
+        STRING
+      end
     end
   end
 end

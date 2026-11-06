@@ -1,9 +1,0 @@
-class CreateTakamaruUnhandledMessageLogs < ActiveRecord::Migration<%= migration_version %>
-  def change
-    create_table(:takamaru_unhandled_message_logs) do |t|
-      t.string(:consumer, null: false)
-      t.json(:payload, null: false)
-      t.timestamps
-    end
-  end
-end

@@ -1,32 +1,39 @@
 module Takamaru
+  # Enqueues "<consumer class name>Job" for every message published by a CommitLoggable model:
+  #
+  #   class UsersConsumer < Takamaru::ShadowModelConsumer
+  #     def initialize
+  #       super('hurricane.users')
+  #     end
+  #   end
+  #
+  #   class UsersConsumerJob < ApplicationJob
+  #     # metadata: { 'message_id' => String, 'occurred_at' => String (ISO 8601), 'sequence' => Integer }
+  #     def perform(id, event, metadata = {})
+  #     end
+  #   end
+  #
+  # Delivery is at least once and not ordered: jobs must be idempotent (message_id) and may discard stale events
+  # (a lower sequence than the last one applied to the same id).
   class ShadowModelConsumer < ApplicationConsumer
+    EVENTS = %w[create destroy update].freeze
+    METADATA = %w[message_id occurred_at sequence].freeze
+
     def consume
-      queue.subscribe do |payload|
-        send_from_payload(payload)
-      rescue StandardError => exception
-        UnhandledMessageLog.create!(consumer: self.class.name, payload: payload)
-        Rollbar.critical(exception)
-      end
+      queue.subscribe { |payload| enqueue_job(JSON.parse(payload)) }
     end
 
     private
 
-    %i[create destroy update].each do |event|
-      define_method("consume_#{event}") do |id|
-        job_class = "#{class_name}Job".constantize
-        job_class.perform_later(id, event.to_s)
-      end
+    def enqueue_job(message)
+      event = message.fetch('event')
+      raise ArgumentError, "Unknown event #{event.inspect}" unless EVENTS.include?(event)
+
+      job_class.perform_later(message.fetch('id'), event, message.slice(*METADATA))
     end
 
-    def class_name
-      self.class.name
-    end
-
-    def send_from_payload(payload)
-      parsed_payload = JSON.parse(payload)
-      event = parsed_payload.fetch('event')
-      id = parsed_payload.fetch('id')
-      send("consume_#{event}", id)
+    def job_class
+      "#{self.class.name}Job".constantize
     end
   end
 end

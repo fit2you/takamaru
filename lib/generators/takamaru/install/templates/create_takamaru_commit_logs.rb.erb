@@ -2,8 +2,14 @@ class CreateTakamaruCommitLogs < ActiveRecord::Migration<%= migration_version %>
   def change
     create_table(:takamaru_commit_logs) do |t|
       t.string(:exchange_name, null: false)
+      t.uuid(:message_id, null: false, index: { unique: true })
       t.json(:payload, null: false)
+      t.datetime(:published_at, index: true)
+      t.integer(:attempts, null: false, default: 0)
+      t.text(:last_error)
       t.timestamps
     end
+
+    add_index(:takamaru_commit_logs, :id, where: 'published_at IS NULL', name: 'index_takamaru_commit_logs_pending')
   end
 end

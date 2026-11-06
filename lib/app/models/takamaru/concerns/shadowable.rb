@@ -1,31 +1,89 @@
 module Takamaru
+  # Local read-only copy ("shadow") of records owned by another service.
+  #
+  #   class User < ApplicationRecord
+  #     include Takamaru::Shadowable
+  #
+  #     has_shadow_attributes :email, :name
+  #     has_shadow_client UsersClient                     # UsersClient.user(id), UsersClient.user_by(attribute, value)
+  #     has_shadow_client UsersClient, parser: MyParser   # MyParser.call(response) returns { id:, attributes: }
+  #   end
+  #
+  #   User.find_or_upsert_from_remote!(42)
+  #   User.find_or_upsert_from_remote_by_email!('jane@example.com')
   module Shadowable
     extend ActiveSupport::Concern
 
-    module ClassMethods
-      attr_reader :shadow_client
+    DYNAMIC_FINDER = /\A(find_or_upsert_from_remote_by|upsert_from_remote_by)_(.+)!\z/
 
+    included do
+      class_attribute :shadow_attributes, instance_accessor: false, default: []
+      class_attribute :shadow_client, instance_accessor: false
+      class_attribute :shadow_parser, instance_accessor: false, default: JsonApiParser
+    end
+
+    class_methods do
       def has_shadow_attributes(*attributes)
-        @shadow_attributes = attributes
-        instance_eval do
-          @shadow_attributes.each { |attribute| define_instance_writer(attribute) }
-        end
+        self.shadow_attributes = attributes
+        attributes.each { |attribute| define_shadow_attribute_writer(attribute) }
       end
 
-      def has_shadow_client(client)
-        @shadow_client = client
-        name_underscored = name.underscore
-        @shadow_finder_method = name_underscored
-        @shadow_finder_by_method = "#{name_underscored}_by"
+      def has_shadow_client(client, parser: JsonApiParser)
+        self.shadow_client = client
+        self.shadow_parser = parser
       end
 
-      def shadow_attributes
-        @shadow_attributes ||= []
+      def find_or_upsert_from_remote!(id)
+        find_by(id: id) || upsert_from_remote!(id)
+      end
+
+      def find_or_upsert_from_remote_by!(attribute, value)
+        find_by(attribute => value) || upsert_from_remote_by!(attribute, value)
+      end
+
+      def upsert_from_remote!(id)
+        upsert_from_response!(shadow_client.public_send(model_name.singular, id))
+      end
+
+      def upsert_from_remote_by!(attribute, value)
+        upsert_from_response!(shadow_client.public_send("#{model_name.singular}_by", attribute, value))
+      end
+
+      def upsert_from_response!(response)
+        parsed = shadow_parser.call(response)
+        attributes = parsed.fetch(:attributes).with_indifferent_access.slice(*shadow_attributes)
+
+        initialize_record(parsed.fetch(:id), attributes)
+      end
+
+      def initialize_record(id, attributes)
+        save_shadow_record(id, attributes)
+      rescue ActiveRecord::RecordNotUnique
+        # Another process inserted the same record in the meantime: now it is found and updated.
+        save_shadow_record(id, attributes)
+      end
+
+      def method_missing(method_name, *args)
+        match = DYNAMIC_FINDER.match(method_name.to_s)
+        return super unless match
+
+        finder, attribute = match.captures
+        public_send("#{finder}!", attribute, *args)
+      end
+
+      def respond_to_missing?(method_name, include_private = false)
+        DYNAMIC_FINDER.match?(method_name.to_s) || super
       end
 
       private
 
-      def define_instance_writer(attribute)
+      def save_shadow_record(id, attributes)
+        record = find_or_initialize_by(id: id)
+        record.allow_shadow_attributes_rewriting { record.update!(attributes) }
+        record
+      end
+
+      def define_shadow_attribute_writer(attribute)
         define_method("#{attribute}=") do |value|
           if persisted? && !shadow_attributes_rewritable?
             raise ActiveRecord::ReadOnlyRecord,
@@ -37,77 +95,15 @@ module Takamaru
       end
     end
 
-    included do
-      class << self
-        def find_or_upsert_from_remote!(id)
-          find(id)
-        rescue ActiveRecord::RecordNotFound
-          upsert_from_remote!(id)
-        end
+    def allow_shadow_attributes_rewriting
+      @shadow_attributes_rewritable = true
+      yield(self)
+    ensure
+      @shadow_attributes_rewritable = false
+    end
 
-        def find_or_upsert_from_remote_by!(attribute, value)
-          find_by(attribute => value) || upsert_from_remote_by!(attribute, value)
-        end
-
-        def initialize_record(id, attributes)
-          record = find_or_initialize_by(id: id)
-          record.allow_shadow_attributes_rewriting do |instance|
-            instance.assign_attributes(attributes)
-            instance.save!
-          end
-
-          record
-        end
-
-        def method_missing(method_name, *args)
-          dynamic_upsert_methods_prefixes = %w[find_or_upsert_from_remote_by_ upsert_from_remote_by_]
-          return foo(method_name, *args) if method_name.to_s.gsub(/[^_]+$/, '').in?(dynamic_upsert_methods_prefixes)
-
-          super
-        end
-
-        def foo(method_name, *args)
-          _, method, attribute = method_name.to_s.match(/^(.*)_([^_]+)!$/).to_a
-          value = args.first
-
-          send("#{method}!", attribute, value)
-        end
-
-        def upsert_from_response!(response)
-          data = response.parsed_response.fetch('data').with_indifferent_access
-
-          origin_id = data[:id]
-          origin_attributes = data[:attributes]&.deep_transform_keys do |key|
-            key.to_s.underscore
-          end&.slice(*@shadow_attributes) || {}
-
-          initialize_record(origin_id, origin_attributes)
-        end
-
-        def respond_to_missing?(method_name, include_private = false)
-          string_method_name = method_name.to_s
-
-          string_method_name.start_with?('find_or_upsert_from_remote_by_', 'upsert_from_remote_by_') || super
-        end
-
-        def upsert_from_remote!(id)
-          upsert_from_response!(@shadow_client.send(@shadow_finder_method, id))
-        end
-
-        def upsert_from_remote_by!(attribute, value)
-          upsert_from_response!(@shadow_client.send(@shadow_finder_by_method, attribute, value))
-        end
-      end
-
-      def allow_shadow_attributes_rewriting(&block)
-        @shadow_attributes_rewritable = true
-        yield self
-        @shadow_attributes_rewritable = false
-      end
-
-      def shadow_attributes_rewritable?
-        @shadow_attributes_rewritable
-      end
+    def shadow_attributes_rewritable?
+      @shadow_attributes_rewritable == true
     end
   end
 end

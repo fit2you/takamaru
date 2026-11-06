@@ -96,25 +96,6 @@ RSpec.configure do |config|
   Kernel.srand(config.seed)
 end
 
-ENV['HURRICANE_BASE_URI'] = 'http://hurricane:3000'
-
 require 'bunny'
 require 'database_cleaner/active_record'
-require 'debug'
 require 'factory_bot'
-require 'httparty'
-require 'set'
-require 'vcr'
-
-USED_CASSETTES = Set.new
-
-VCR.configure do |config|
-  config.before_http_request(:real?) do |request|
-    request.headers['Accept'] = 'application/json'
-    request.headers['Accept-Encoding'] = 'identity'
-  end
-  config.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
-  config.hook_into(:webmock)
-end
-
-RSpec::Mocks.configuration.allow_message_expectations_on_nil = true

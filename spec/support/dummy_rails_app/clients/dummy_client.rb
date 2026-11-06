@@ -1,4 +1,4 @@
-class DummyClient < Takamaru::ApplicationClient
+class DummyClient
   class << self
     def dummy(id)
     end
