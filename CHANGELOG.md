@@ -15,10 +15,18 @@ Breaking release, see [UPGRADING.md](UPGRADING.md).
   `TAKAMARU_PUBLISHING_ENABLED` to pause publishing.
 - Message metadata: `message_id`, `occurred_at`, `sequence`, passed to consumer jobs as third argument.
 - Dead letter queue `<queue>.dead` for each consumer queue.
-- `Shadowable` accepts a `parser:` for the client responses (default `Takamaru::JsonApiParser`).
+- `Takamaru::ShadowClient`: base class describing the client of a shadow model (`find`, `find_by`, `parse`, JSON:API
+  by default), and `Takamaru::RemoteRecordNotFound` for missing remote records.
 - `takamaru:upgrade` generator for the commit log table created by 0.x.
-- Railtie with the `takamaru:declare_queues`, `takamaru:relay`, `takamaru:relay_once` and `takamaru:cleanup` rake
-  tasks. `takamaru:declare_queues` declares the consumer queues before any process starts.
+- Versioned shadow models: with a `remote_updated_at` column (`takamaru:shadow_version` generator), `Shadowable` skips
+  responses older than the applied one, under a row lock, so that concurrent jobs cannot restore an older state.
+- Messaging topology `config/takamaru.yml` (`Takamaru::Topology`): application name and exchange of each consumer,
+  the only definition of the consumer queues.
+- `takamaru-declare-queues` executable: declares the consumer queues of the topology before any process starts,
+  without loading Rails nor the application (`--environment`, `--env-file`).
+- Railtie with the `takamaru:declare_queues`, `takamaru:check_topology`, `takamaru:relay`, `takamaru:relay_once` and
+  `takamaru:cleanup` rake tasks. `takamaru:check_topology` (and `Takamaru::ApplicationConsumer.topology_errors`)
+  checks that consumer classes and topology match.
 
 ### Changed
 
@@ -28,7 +36,8 @@ Breaking release, see [UPGRADING.md](UPGRADING.md).
 - One RabbitMQ connection per process instead of one per published message.
 - Commit logs are marked as published instead of being deleted, and keep `attempts` and `last_error`.
 - Updates without changes are no longer published.
-- `RabbitMq::*` moved to `Takamaru::RabbitMq::*`.
+- `RabbitMq::*` moved to `Takamaru::RabbitMq::*`; `Takamaru::RabbitMq::Queue.new` takes the full queue name.
+- Consumers read their exchange from the topology: `Takamaru::ApplicationConsumer#initialize` takes no arguments.
 - Requires Ruby >= 3.1, Rails >= 7.0 (Rails 8 supported), PostgreSQL.
 
 ### Fixed
