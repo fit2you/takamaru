@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+# Declares the queues of the consumers of config/takamaru.yml without loading Rails: see Takamaru::DeclareQueuesCommand.
+require 'takamaru/declare_queues_command'
+
+exit(Takamaru::DeclareQueuesCommand.new(ARGV).run)

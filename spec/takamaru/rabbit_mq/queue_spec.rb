@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe(Takamaru::RabbitMq::Queue) do
-  subject(:queue) { described_class.new('server.dummies', 'dummies_consumer') }
+  subject(:queue) { described_class.new('server.dummies', 'rails_application.dummies_consumer') }
 
   let(:bunny_queue) { instance_double(Bunny::Queue) }
   let(:channel) do
@@ -26,7 +26,7 @@ RSpec.describe(Takamaru::RabbitMq::Queue) do
     allow(queue).to(receive(:sleep)) { queue.stop }
   end
 
-  it 'is named after the application and the consumer' do
+  it 'has a dead letter queue named after it' do
     expect(queue.name).to(eq('rails_application.dummies_consumer'))
     expect(queue.dead_letter_queue_name).to(eq('rails_application.dummies_consumer.dead'))
   end

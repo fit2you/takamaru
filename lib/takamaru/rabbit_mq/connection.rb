@@ -1,3 +1,5 @@
+require 'bunny'
+
 module Takamaru
   module RabbitMq
     # One Bunny session per process, opened lazily and shared by all threads.
@@ -12,6 +14,17 @@ module Takamaru
             @session = open_session unless @session&.open?
             @session
           end
+        end
+
+        # Opens a new Bunny session, not shared, with the given options (hostname, port, username, password, vhost).
+        def start(options)
+          Bunny.new(
+            hostname: options.fetch(:hostname),
+            password: options.fetch(:password),
+            port: options.fetch(:port),
+            username: options.fetch(:username),
+            vhost: options.fetch(:vhost, '/'),
+          ).tap(&:start)
         end
 
         def close
@@ -32,15 +45,7 @@ module Takamaru
         end
 
         def open_session
-          options = Takamaru.config.rabbitmq
-
-          Bunny.new(
-            hostname: options.fetch(:hostname),
-            password: options.fetch(:password),
-            port: options.fetch(:port),
-            username: options.fetch(:username),
-            vhost: options.fetch(:vhost, '/'),
-          ).tap(&:start)
+          start(Takamaru.config.rabbitmq)
         end
       end
     end

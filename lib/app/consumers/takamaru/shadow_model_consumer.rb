@@ -1,10 +1,11 @@
 module Takamaru
   # Enqueues "<consumer class name>Job" for every message published by a CommitLoggable model:
   #
+  #   # config/takamaru.yml
+  #   consumers:
+  #     users_consumer: hurricane.users
+  #
   #   class UsersConsumer < Takamaru::ShadowModelConsumer
-  #     def initialize
-  #       super('hurricane.users')
-  #     end
   #   end
   #
   #   class UsersConsumerJob < ApplicationJob
@@ -13,8 +14,9 @@ module Takamaru
   #     end
   #   end
   #
-  # Delivery is at least once and not ordered: jobs must be idempotent (message_id) and may discard stale events
-  # (a lower sequence than the last one applied to the same id).
+  # Delivery is at least once and not ordered. The message carries only the id: the job reads the current state of the
+  # remote record (e.g. Shadowable.upsert_from_remote!), so duplicated and out-of-order messages are harmless and
+  # message_id and sequence are only for logs and diagnosis.
   class ShadowModelConsumer < ApplicationConsumer
     EVENTS = %w[create destroy update].freeze
     METADATA = %w[message_id occurred_at sequence].freeze

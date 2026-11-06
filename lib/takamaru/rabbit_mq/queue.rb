@@ -1,21 +1,21 @@
 module Takamaru
   module RabbitMq
-    # Durable queue "<application name>.<consumer name>" bound to a durable fanout exchange.
+    # Durable queue (named "<application name>.<consumer name>" by the topology) bound to a durable fanout exchange.
     # A message is acknowledged once the subscriber block returns; if the block raises, the message is moved to the
     # dead letter queue "<queue name>.dead".
     class Queue
       attr_reader :exchange_name, :name
 
-      def initialize(exchange_name, consumer_name)
+      def initialize(exchange_name, name)
         @exchange_name = exchange_name
-        @name = [Takamaru.rails_application_name, consumer_name].join('.')
+        @name = name
       end
 
       def dead_letter_queue_name
-        "#{name}.dead"
+        Declaration.dead_letter_queue_name(name)
       end
 
-      # Declares exchange, queue, dead letter queue and binding without consuming (rails takamaru:declare_queues).
+      # Declares exchange, queue, dead letter queue and binding without consuming.
       def declare
         channel = Connection.session.create_channel
         declare_on(channel)
@@ -47,15 +47,7 @@ module Takamaru
       private
 
       def declare_on(channel)
-        exchange = channel.fanout(exchange_name, durable: true)
-        channel.queue(dead_letter_queue_name, durable: true)
-
-        # The empty name is the default exchange, which routes a message to the queue named as its routing key.
-        queue = channel.queue(name, durable: true, arguments: {
-          'x-dead-letter-exchange' => '',
-          'x-dead-letter-routing-key' => dead_letter_queue_name,
-        })
-        queue.bind(exchange)
+        Declaration.declare(channel, exchange_name: exchange_name, queue_name: name)
       end
 
       def process(channel, delivery_tag, payload)

@@ -1,6 +1,7 @@
 module Takamaru
   class Configuration
-    # Prefix of exchange and queue names. Defaults to the underscored module of the Rails application.
+    # Prefix of exchange and queue names. Defaults to the application_name of the topology (config/takamaru.yml),
+    # then to the underscored module of the Rails application. Setting a different name from the topology raises.
     attr_writer :application_name
 
     # How often the relay process deletes the commit logs published before published_retention.
@@ -30,6 +31,13 @@ module Takamaru
     # Seconds the relay process waits between two rounds.
     attr_accessor :relay_interval
 
+    # Messaging topology, see Takamaru::Topology. Defaults to config/takamaru.yml of the Rails application, nil when
+    # the file does not exist (an application without consumers does not need it).
+    attr_writer :topology
+
+    # Path of the topology file. Defaults to config/takamaru.yml of the Rails application.
+    attr_writer :topology_path
+
     def initialize
       @cleanup_interval = 1.hour
       @consumer_prefetch = 10
@@ -42,7 +50,22 @@ module Takamaru
     end
 
     def application_name
-      @application_name ||= Rails.application.class.module_parent_name.underscore
+      if topology && @application_name && @application_name != topology.application_name
+        raise ConfigurationError,
+          "application_name #{@application_name} differs from #{topology.application_name} of the Takamaru topology"
+      end
+
+      @application_name || topology&.application_name || Rails.application.class.module_parent_name.underscore
+    end
+
+    def topology
+      return @topology if defined?(@topology)
+
+      @topology = File.exist?(topology_path) ? Topology.load(topology_path) : nil
+    end
+
+    def topology_path
+      @topology_path ||= Rails.root.join('config/takamaru.yml')
     end
 
     def rabbitmq

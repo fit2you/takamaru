@@ -8,7 +8,9 @@ Gem::Specification.new do |spec|
   spec.homepage = 'https://github.com/fit2you/takamaru'
   spec.license = 'MIT'
 
-  spec.files = Dir['lib/**/*', 'CHANGELOG.md', 'README.md', 'UPGRADING.md'].reject { |f| File.directory?(f) }
+  spec.bindir = 'exe'
+  spec.executables = ['takamaru-declare-queues']
+  spec.files = Dir['exe/*', 'lib/**/*', 'CHANGELOG.md', 'README.md', 'UPGRADING.md'].reject { |f| File.directory?(f) }
   spec.name = 'takamaru'
   spec.required_ruby_version = '>= 3.1'
   spec.version = Takamaru::VERSION
@@ -22,6 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('bundler-audit')
   spec.add_development_dependency('byebug')
   spec.add_development_dependency('database_cleaner-active_record')
+  spec.add_development_dependency('dotenv') # optional at runtime: takamaru-declare-queues --env-file
   spec.add_development_dependency('factory_bot')
   spec.add_development_dependency('generator_spec')
   spec.add_development_dependency('pg', '~> 1.6')

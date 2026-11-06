@@ -43,6 +43,10 @@ RSpec.configure do |config|
   config.before do
     ActiveJob::Base.queue_adapter.enqueued_jobs.clear
     Takamaru.config.application_name = 'rails_application'
+    Takamaru.config.topology = Takamaru::Topology.new(
+      'application_name' => 'rails_application',
+      'consumers' => { 'dummies_consumer' => 'server.dummies' },
+    )
     Takamaru.config.error_handler = ->(error, _context) { raise error }
     Takamaru.config.publishing_enabled = true
     Takamaru.config.rabbitmq = { hostname: 'localhost', password: 'guest', port: 5672, username: 'guest' }
