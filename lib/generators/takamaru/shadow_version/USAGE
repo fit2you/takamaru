@@ -1,0 +1,9 @@
+Description:
+  Generates (but does not run) a migration adding remote_updated_at to the table of a shadow model: Takamaru::Shadowable
+  then skips the responses older than the remote record already applied. See Shadow models section in README.md.
+
+Example:
+  rails generate takamaru:shadow_version User
+
+  This will create:
+    db/migrate/XXXXXXXXXXXXXX_add_remote_updated_at_to_users.rb

@@ -13,11 +13,11 @@ module Takamaru
 
     protected
 
-    def add_takamaru_migration(template)
-      if self.class.migration_exists?(File.join(destination_root, 'db/migrate'), template)
-        ::Kernel.warn("Migration already exists: #{template}")
+    def add_takamaru_migration(template, file_name = template)
+      if self.class.migration_exists?(File.join(destination_root, 'db/migrate'), file_name)
+        ::Kernel.warn("Migration already exists: #{file_name}")
       else
-        migration_template("#{template}.rb.erb", "db/migrate/#{template}.rb", migration_version: migration_version)
+        migration_template("#{template}.rb.erb", "db/migrate/#{file_name}.rb", migration_version: migration_version)
       end
     end
 

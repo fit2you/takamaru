@@ -5,18 +5,27 @@ RSpec.describe(Takamaru::Shadowable) do
     { 'data' => { 'id' => 42, 'type' => 'dummies', 'attributes' => { 'attribute_1' => 'one', 'attribute_2' => 'two' } } }
   end
 
+  let(:client) { Dummy.shadow_client }
+
   before do
-    allow(DummyClient).to(receive(:dummy).with(42).and_return(document))
-    allow(DummyClient).to(receive(:dummy_by).with('attribute_1', 'one').and_return(document))
+    allow(client).to(receive(:find).with(42).and_return(document))
+    allow(client).to(receive(:find_by).with('attribute_1', 'one').and_return(document))
   end
 
   it 'has shadow attributes' do
     expect(Dummy.shadow_attributes).to(eq(%i[attribute_1 attribute_2]))
   end
 
-  it 'has shadow client and parser' do
-    expect(Dummy.shadow_client).to(eq(DummyClient))
-    expect(Dummy.shadow_parser).to(eq(Takamaru::JsonApiParser))
+  it 'has a shadow client' do
+    expect(Dummy.shadow_client).to(be_a(DummyClient))
+  end
+
+  describe '.has_shadow_client' do
+    it 'rejects a client that is not a Takamaru::ShadowClient' do
+      model = Class.new(ActiveRecord::Base) { include Takamaru::Shadowable }
+
+      expect { model.has_shadow_client(Object.new) }.to(raise_error(ArgumentError, /Takamaru::ShadowClient/))
+    end
   end
 
   describe '.find_or_upsert_from_remote!' do
@@ -24,13 +33,20 @@ RSpec.describe(Takamaru::Shadowable) do
       dummy = Dummy.create!(id: 42)
 
       expect(Dummy.find_or_upsert_from_remote!(42)).to(eq(dummy))
-      expect(DummyClient).not_to(have_received(:dummy))
+      expect(client).not_to(have_received(:find))
     end
 
     it 'creates the record from the remote one' do
       dummy = Dummy.find_or_upsert_from_remote!(42)
 
       expect(dummy.reload).to(have_attributes(id: 42, attribute_1: 'one', attribute_2: 'two'))
+    end
+
+    it 'lets the client report a missing remote record' do
+      allow(client).to(receive(:find).with(7).and_raise(Takamaru::RemoteRecordNotFound))
+
+      expect { Dummy.find_or_upsert_from_remote!(7) }.to(raise_error(Takamaru::RemoteRecordNotFound))
+      expect(Dummy.exists?(7)).to(be(false))
     end
   end
 
@@ -55,9 +71,10 @@ RSpec.describe(Takamaru::Shadowable) do
   end
 
   describe '.upsert_from_response!' do
-    it 'uses the configured parser' do
-      parser = ->(response) { { id: response[:key], attributes: { 'attribute_2' => 'parsed', 'ignored' => true } } }
-      allow(Dummy).to(receive(:shadow_parser).and_return(parser))
+    it 'parses the response with the client' do
+      allow(client).to(receive(:parse).and_wrap_original do |_original, response|
+        { id: response[:key], attributes: { 'attribute_2' => 'parsed', 'ignored' => true } }
+      end)
 
       expect(Dummy.upsert_from_response!({ key: 7 })).to(have_attributes(id: 7, attribute_2: 'parsed'))
     end
@@ -74,6 +91,72 @@ RSpec.describe(Takamaru::Shadowable) do
       Dummy.upsert_from_response!(document)
 
       expect(existing.reload.attribute_1).to(eq('one'))
+    end
+  end
+
+  describe 'versioning with remote_updated_at' do
+    let(:newer) { '2026-11-06T10:00:00.000002Z' }
+    let(:older) { '2026-11-06T10:00:00.000001Z' }
+
+    def response(attribute_1, updated_at)
+      attributes = { 'attribute_1' => attribute_1, 'updatedAt' => updated_at }.compact
+      { 'data' => { 'id' => 42, 'type' => 'dummies', 'attributes' => attributes } }
+    end
+
+    it 'saves the updated_at of the remote record, with microseconds' do
+      Dummy.upsert_from_response!(response('new', newer))
+
+      expect(Dummy.find(42).remote_updated_at).to(eq(Time.iso8601(newer)))
+    end
+
+    it 'skips a response older than the applied one' do
+      Dummy.upsert_from_response!(response('new', newer))
+
+      record = Dummy.upsert_from_response!(response('old', older))
+
+      expect(record).to(have_attributes(attribute_1: 'new', remote_updated_at: Time.iso8601(newer)))
+      expect(Dummy.find(42)).to(have_attributes(attribute_1: 'new', remote_updated_at: Time.iso8601(newer)))
+    end
+
+    it 'applies a newer response' do
+      Dummy.upsert_from_response!(response('old', older))
+      Dummy.upsert_from_response!(response('new', newer))
+
+      expect(Dummy.find(42)).to(have_attributes(attribute_1: 'new', remote_updated_at: Time.iso8601(newer)))
+    end
+
+    it 'applies a response with the same version again' do
+      Dummy.upsert_from_response!(response('one', newer))
+      Dummy.upsert_from_response!(response('two', newer))
+
+      expect(Dummy.find(42).attribute_1).to(eq('two'))
+    end
+
+    it 'applies a response without updated_at, keeping the saved version' do
+      Dummy.upsert_from_response!(response('old', newer))
+      Dummy.upsert_from_response!(response('new', nil))
+
+      expect(Dummy.find(42)).to(have_attributes(attribute_1: 'new', remote_updated_at: Time.iso8601(newer)))
+    end
+
+    it 'locks the row before comparing the versions' do
+      Dummy.upsert_from_response!(response('old', older))
+      queries = []
+      callback = ->(*, payload) { queries << payload[:sql] }
+
+      ActiveSupport::Notifications.subscribed(callback, 'sql.active_record') do
+        Dummy.upsert_from_response!(response('new', newer))
+      end
+
+      expect(queries).to(include(/FOR UPDATE/))
+    end
+
+    it 'ignores updated_at when the table has no remote_updated_at' do
+      allow(Dummy).to(receive(:shadow_versioned?).and_return(false))
+
+      Dummy.upsert_from_response!(response('new', newer))
+
+      expect(Dummy.find(42)).to(have_attributes(attribute_1: 'new', remote_updated_at: nil))
     end
   end
 

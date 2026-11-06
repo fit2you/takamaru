@@ -1,9 +1,7 @@
-class DummyClient
-  class << self
-    def dummy(id)
-    end
+class DummyClient < Takamaru::ShadowClient
+  def find(id)
+  end
 
-    def dummy_by(attribute, value)
-    end
+  def find_by(attribute, value)
   end
 end
