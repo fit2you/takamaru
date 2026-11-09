@@ -1,0 +1,26 @@
+class UpgradeTakamaruCommitLogsToV1 < ActiveRecord::Migration<%= migration_version %>
+  class CommitLog < ActiveRecord::Base
+    self.table_name = 'takamaru_commit_logs'
+  end
+
+  def up
+    add_column(:takamaru_commit_logs, :message_id, :uuid)
+    add_column(:takamaru_commit_logs, :published_at, :datetime)
+    add_column(:takamaru_commit_logs, :attempts, :integer, null: false, default: 0)
+    add_column(:takamaru_commit_logs, :last_error, :text)
+
+    # Rows left by takamaru < 1.0 have not been published yet: they stay pending and get a message id.
+    CommitLog.reset_column_information
+    CommitLog.find_each { |commit_log| commit_log.update!(message_id: SecureRandom.uuid) }
+    change_column_null(:takamaru_commit_logs, :message_id, false)
+
+    add_index(:takamaru_commit_logs, :message_id, unique: true)
+    add_index(:takamaru_commit_logs, :published_at)
+    add_index(:takamaru_commit_logs, :id, where: 'published_at IS NULL', name: 'index_takamaru_commit_logs_pending')
+  end
+
+  def down
+    remove_index(:takamaru_commit_logs, name: 'index_takamaru_commit_logs_pending')
+    remove_columns(:takamaru_commit_logs, :message_id, :published_at, :attempts, :last_error)
+  end
+end

@@ -1,13 +1,9 @@
 class DummiesConsumerJob < ActiveJob::Base
-  attr_reader :id
-
-  def perform(id, event)
+  def perform(id, event, _metadata = {})
     if %w[create update].include?(event)
       Dummy.upsert_from_remote!(id)
     elsif event == 'destroy'
-      Dummy.find_by_id(id)&.destroy!
-    else
-      raise "Unknown event: #{event}"
+      Dummy.find_by(id: id)&.destroy!
     end
   end
 end

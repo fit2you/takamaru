@@ -1,0 +1,6 @@
+# updated_at of the remote record last applied to the shadow copy: Takamaru::Shadowable skips older responses.
+class <%= migration_class_name %> < ActiveRecord::Migration<%= migration_version %>
+  def change
+    add_column(:<%= table_name %>, :remote_updated_at, :datetime, precision: 6)
+  end
+end

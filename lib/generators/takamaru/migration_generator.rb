@@ -5,33 +5,24 @@ module Takamaru
   class MigrationGenerator < ::Rails::Generators::Base
     include ::Rails::Generators::Migration
 
-    def self.next_migration_number(dirname)
-      ::ActiveRecord::Generators::Base.next_migration_number(dirname)
+    class << self
+      def next_migration_number(dirname)
+        ::ActiveRecord::Generators::Base.next_migration_number(dirname)
+      end
     end
 
     protected
 
-    def add_takamaru_migration(template, extra_options = {})
-      migration_dir = File.expand_path(Rails.env.test? ? 'tmp/db/migrate' : 'db/migrate')
-      if self.class.migration_exists?(migration_dir, template)
-        ::Kernel.warn("Migration already exists: #{template}")
+    def add_takamaru_migration(template, file_name = template)
+      if self.class.migration_exists?(File.join(destination_root, 'db/migrate'), file_name)
+        ::Kernel.warn("Migration already exists: #{file_name}")
       else
-        migration_template(
-          "#{template}.rb.erb",
-          "db/migrate/#{template}.rb",
-          { migration_version: migration_version }.merge(extra_options)
-        )
+        migration_template("#{template}.rb.erb", "db/migrate/#{file_name}.rb", migration_version: migration_version)
       end
     end
 
     def migration_version
-      return '' if ::ActiveRecord::VERSION::MAJOR < 5
-
-      format(
-        '[%d.%d]',
-        ActiveRecord::VERSION::MAJOR,
-        ActiveRecord::VERSION::MINOR
-      )
+      "[#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}]"
     end
   end
 end

@@ -1,79 +1,59 @@
 require 'rails_helper'
 
 RSpec.describe(DummiesConsumer) do
-  let(:consumer) { described_class.new }
-  let(:dummy) { create(:dummy) }
+  subject(:consumer) { described_class.new }
 
-  before do
-    allow(Rails.application).to(receive('config_for').with(:rabbitmq).and_return({
-      hostname: 'localhost',
-      password: 'guest',
-      port: 5672,
-      username: 'guest',
-      vhost: '/',
-    }))
+  let(:message) do
+    { 'event' => 'update', 'id' => 42, 'message_id' => 'uuid', 'occurred_at' => '2026-11-03T10:00:00Z', 'sequence' => 7 }
   end
 
-  describe('.new') do
-    it('initializes a new instance') do
-      expect(consumer).to(be_a(described_class))
-      expect(consumer.instance_variable_get(:@queue)).to(be_a(RabbitMq::Queue))
-    end
+  def consume(payload)
+    allow(consumer.queue).to(receive(:subscribe)) { |&block| block.call(payload) }
+    consumer.consume
   end
 
-  %i[create destroy update].each do |event|
-    describe("#consume_#{event}") do
-      it("enqueues a job to #{event} a shadow model") do
-        expect(DummiesConsumerJob).to(receive('perform_later').once.with(dummy.id, event.to_s))
+  it 'consumes the queue named after the consumer' do
+    expect(consumer.queue).to(have_attributes(exchange_name: 'server.dummies', name: 'rails_application.dummies_consumer'))
+  end
 
-        consumer.send(:"consume_#{event}", dummy.id)
-      end
+  %w[create destroy update].each do |event|
+    it "enqueues the consumer job for a #{event} event" do
+      expect { consume(message.merge('event' => event).to_json) }.to(have_enqueued_job(DummiesConsumerJob).with(
+        42,
+        event,
+        { 'message_id' => 'uuid', 'occurred_at' => '2026-11-03T10:00:00Z', 'sequence' => 7 },
+      ))
     end
   end
 
-  describe('#consume') do
-    before do
-      allow(Bunny).to(receive('new').and_return(double(
-        start: nil,
-        create_channel: double(fanout: nil, queue: double(bind: nil, subscribe: nil)),
-      )))
-    end
-
-    context('with a valid payload') do
-      it('subscribes to the queue') do
-        expect(consumer.queue).to(receive('subscribe')).and_call_original
-
-        consumer.consume
-      end
-    end
-
-    context('with an invalid payload') do
-      let(:payload) { 'invalid' }
-
-      before do
-        allow_any_instance_of(RabbitMq::Queue).to(receive('subscribe') { |&block| block.call(payload) })
-      end
-
-      it('subscribes to the queue') do
-        expect(Rollbar).to(receive('critical').once)
-        expect { consumer.consume }.to(change { Takamaru::UnhandledMessageLog.count }.by(1))
-        expect(Takamaru::UnhandledMessageLog.last.consumer).to(eq(described_class.name))
-        expect(Takamaru::UnhandledMessageLog.last.payload).to(eq(payload))
-      end
-    end
+  it 'rejects an unknown event' do
+    expect { consume(message.merge('event' => 'instance_eval').to_json) }
+      .to(raise_error(ArgumentError, 'Unknown event "instance_eval"'))
   end
 
-  describe('#send_from_payload') do
-    %i[create destroy update].each do |event|
-      context("when the event is #{event}") do
-        let(:payload) { { event: event, id: dummy.id }.to_json }
+  it 'raises an EnqueueError, caused by the backend error, when the job is not enqueued' do
+    allow(DummiesConsumerJob).to(receive(:perform_later).and_raise(Errno::ECONNREFUSED))
 
-        it('calls the appropriate method') do
-          expect(consumer).to(receive(:"consume_#{event}").once.with(dummy.id))
+    expect { consume(message.to_json) }.to(raise_error(Takamaru::EnqueueError) do |error|
+      expect(error.cause).to(be_a(Errno::ECONNREFUSED))
+    end)
+  end
 
-          consumer.send(:send_from_payload, payload)
-        end
-      end
-    end
+  it 'raises an EnqueueError when the job backend returns false' do
+    allow(DummiesConsumerJob).to(receive(:perform_later).and_return(false))
+
+    expect { consume(message.to_json) }.to(raise_error(Takamaru::EnqueueError, 'DummiesConsumerJob not enqueued'))
+  end
+
+  it 'rejects an invalid payload' do
+    expect { consume('invalid') }.to(raise_error(JSON::ParserError))
+  end
+
+  it 'stops the queue' do
+    allow(consumer.queue).to(receive(:stop))
+
+    consumer.stop
+
+    expect(consumer.queue).to(have_received(:stop))
   end
 end

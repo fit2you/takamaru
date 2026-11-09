@@ -1,48 +1,58 @@
-# rubocop:disable Style/ClassVars
 module Takamaru
+  # Transactional outbox: every create, update and destroy of the including model writes a commit log in the same
+  # transaction, and the relay is enqueued once the transaction is committed.
+  #
+  # Changes that skip callbacks (update_columns, update_all, delete, delete_all, insert_all, upsert_all) are not logged.
   module CommitLoggable
     extend ActiveSupport::Concern
 
-    attr_reader :do_not_log_commit
-
     included do
-      after_commit :mine_commit_logs
-      after_create :publish_create_message
-      after_destroy :publish_destroy_message
-      after_update :publish_update_message
+      # Last part of the exchange name "<application name>.<takamaru_class_name>"
+      class_attribute :takamaru_class_name, instance_accessor: false, default: name.tableize
 
-      class_variable_set(:@@takamaru_class_name, name.tableize)
+      after_create { log_commit(:create) }
+      after_update { log_commit(:update) if saved_changes? }
+      after_destroy { log_commit(:destroy) }
 
-      class << self
-        def override_takamaru_class_name(class_name)
-          class_variable_set(:@@takamaru_class_name, class_name)
-        end
+      after_commit :enqueue_commit_log_relay
+      after_rollback { @commit_log_pending = false }
+    end
+
+    class_methods do
+      def override_takamaru_class_name(class_name)
+        self.takamaru_class_name = class_name
       end
     end
 
-    def without_commit_log(&block)
-      @do_not_log_commit = true
-      yield self
-      @do_not_log_commit = false
+    def without_commit_log
+      @commit_log_disabled = true
+      yield(self)
+    ensure
+      @commit_log_disabled = false
     end
 
     private
 
-    %i[create destroy update].each do |event|
-      define_method "publish_#{event}_message" do
-        log_commit(event) unless do_not_log_commit
-      end
-    end
-
     def log_commit(event)
-      exchange_name = "#{Takamaru.rails_application_name}.#{self.class.class_variable_get(:@@takamaru_class_name)}"
-      @commit_log_id = Takamaru::CommitLog.create!(exchange_name: exchange_name, payload: { id: id, event: event }).id
+      return if @commit_log_disabled
+
+      CommitLog.create!(exchange_name: commit_log_exchange_name, payload: { 'event' => event.to_s, 'id' => id })
+      @commit_log_pending = true
     end
 
-    def mine_commit_logs
-      Takamaru::CommitLogMinerJob.perform_later(@commit_log_id)
+    def commit_log_exchange_name
+      "#{Takamaru.rails_application_name}.#{self.class.takamaru_class_name}"
+    end
+
+    # The commit log is already committed: if the job cannot be enqueued, the periodic relay will publish it.
+    def enqueue_commit_log_relay
+      return unless @commit_log_pending
+
+      @commit_log_pending = false
+      Takamaru.perform_later!(CommitLogRelayJob)
+    rescue EnqueueError => error
+      # The relay process publishes the commit log anyway, a few seconds later.
+      Takamaru.report_error(error)
     end
   end
 end
-
-# rubocop:enable Style/ClassVars

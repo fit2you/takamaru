@@ -13,7 +13,7 @@ namespace :code do
     puts '== Quality report generation '.ljust(80, '=')
     puts
     paths = FileList.new(
-      'lib/**/*.rb'
+      'lib/**/*.rb',
     ).join(' ')
     abort unless system("rubycritic #{paths}")
   end
