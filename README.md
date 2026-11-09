@@ -100,6 +100,21 @@ Takamaru.configure do |config|
 end
 ```
 
+## Errors
+
+Errors that Takamaru handles without raising (a message dead-lettered by a consumer, a commit log not published, a
+relay job not enqueued) go to `config.error_handler`, a callable receiving `(error, context)`. The default,
+`Rails.error.report(error, handled: true, context: context)`, reaches the error tracker only if it subscribes to the
+Rails error reporter; otherwise call the tracker from the handler.
+
+Errors that go away by themselves are subclasses of `Takamaru::TransientError`, with the original error as `cause`, so
+that error trackers grouping by class keep them apart from bugs:
+
+| Class                    | When                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `Takamaru::PublishError` | RabbitMQ unreachable or not confirming: the commit logs stay pending          |
+| `Takamaru::EnqueueError` | job backend (e.g. Redis) not enqueuing: the consumer dead-letters the message |
+
 ## Publishing
 
 ```ruby

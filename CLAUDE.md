@@ -42,7 +42,10 @@ migration: UPGRADING.md.
 
 - Readable code, only public/documented Rails APIs.
 - Rubocop (Shopify style) must pass: `bundle exec rubocop`. Use `class << self` for class methods.
-- Errors handled without raising go to `Takamaru.report_error(error, context)`.
+- Errors handled without raising go to `Takamaru.report_error(error, context)`. Transient failures are wrapped (cause
+  kept) in `TransientError` subclasses, one per kind, because Rollbar groups by class: `PublishError` (broker, see
+  `Connection::NETWORK_ERRORS`; config errors like `PreconditionFailed` stay raw), `EnqueueError`
+  (`Takamaru.perform_later!`).
 
 ## Tests
 
