@@ -87,7 +87,10 @@ RSpec.describe(Takamaru::CommitLoggable) do
       allow(Takamaru::CommitLogRelayJob).to(receive(:perform_later).and_raise('queue down'))
 
       expect { DummyCommitLoggable.create!(name: 'foo') }.to(change { Takamaru::CommitLog.count }.by(1))
-      expect(reported_errors.map(&:message)).to(eq(['queue down']))
+      expect(reported_errors).to(contain_exactly(an_object_having_attributes(
+        class: Takamaru::EnqueueError,
+        cause: an_object_having_attributes(message: 'queue down'),
+      )))
     end
   end
 

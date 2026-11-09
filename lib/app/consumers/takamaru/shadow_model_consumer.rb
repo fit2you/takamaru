@@ -31,7 +31,7 @@ module Takamaru
       event = message.fetch('event')
       raise ArgumentError, "Unknown event #{event.inspect}" unless EVENTS.include?(event)
 
-      job_class.perform_later(message.fetch('id'), event, message.slice(*METADATA))
+      Takamaru.perform_later!(job_class, message.fetch('id'), event, message.slice(*METADATA))
     end
 
     def job_class

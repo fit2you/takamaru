@@ -49,8 +49,9 @@ module Takamaru
       return unless @commit_log_pending
 
       @commit_log_pending = false
-      CommitLogRelayJob.perform_later
-    rescue StandardError => error
+      Takamaru.perform_later!(CommitLogRelayJob)
+    rescue EnqueueError => error
+      # The relay process publishes the commit log anyway, a few seconds later.
       Takamaru.report_error(error)
     end
   end

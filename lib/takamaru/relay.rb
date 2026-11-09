@@ -10,8 +10,8 @@ module Takamaru
 
       published_count = CommitLog.transaction { publish_in_order(lock_pending_batch) }
       published_count == batch_size
-    rescue Bunny::Exception => error
-      # The broker is unreachable: the commit logs stay pending and the next run will retry them.
+    rescue PublishError, Bunny::Exception => error
+      # Broker unreachable (PublishError) or misconfigured: the commit logs stay pending and the next run retries them.
       Takamaru.report_error(error)
       false
     end

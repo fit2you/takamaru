@@ -17,6 +17,9 @@ Breaking release, see [UPGRADING.md](UPGRADING.md).
 - Dead letter queue `<queue>.dead` for each consumer queue.
 - `Takamaru::ShadowClient`: base class describing the client of a shadow model (`find`, `find_by`, `parse`, JSON:API
   by default), and `Takamaru::RemoteRecordNotFound` for missing remote records.
+- `Takamaru::TransientError`, base class of `Takamaru::PublishError` (RabbitMQ unreachable or not confirming) and
+  `Takamaru::EnqueueError` (job backend not enqueuing), with the original error as cause: error trackers group
+  transient failures apart from bugs.
 - `takamaru:upgrade` generator for the commit log table created by 0.x.
 - Versioned shadow models: with a `remote_updated_at` column (`takamaru:shadow_version` generator), `Shadowable` skips
   responses older than the applied one, under a row lock, so that concurrent jobs cannot restore an older state.

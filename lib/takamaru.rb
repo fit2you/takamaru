@@ -52,5 +52,16 @@ module Takamaru
     def report_error(error, context = {})
       config.error_handler.call(error, context)
     end
+
+    # Like job_class.perform_later, but raises Takamaru::EnqueueError, with the original error as cause, when the job
+    # backend does not enqueue the job (e.g. Redis is unreachable) instead of raising its own errors or returning false.
+    def perform_later!(job_class, *arguments)
+      enqueued = begin
+        job_class.perform_later(*arguments)
+      rescue StandardError => error
+        raise EnqueueError, "#{job_class.name} not enqueued: #{error.class}: #{error.message}"
+      end
+      raise EnqueueError, "#{job_class.name} not enqueued" unless enqueued
+    end
   end
 end

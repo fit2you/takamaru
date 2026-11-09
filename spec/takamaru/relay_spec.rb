@@ -43,10 +43,14 @@ RSpec.describe(Takamaru::Relay) do
 
   it 'keeps the commit logs pending when the broker is unreachable' do
     create(:commit_log)
-    allow(Takamaru::RabbitMq::Publisher).to(receive(:open).and_raise(Bunny::TCPConnectionFailedForAllHosts))
+    allow(Takamaru::RabbitMq::Publisher).to(receive(:open).and_call_original)
+    allow(Takamaru::RabbitMq::Connection).to(receive(:session).and_raise(Bunny::TCPConnectionFailedForAllHosts))
 
     expect { relay.publish_batch }.not_to(change { Takamaru::CommitLog.pending.count })
-    expect(reported_errors).to(contain_exactly(be_a(Bunny::TCPConnectionFailedForAllHosts)))
+    expect(reported_errors).to(contain_exactly(an_object_having_attributes(
+      class: Takamaru::PublishError,
+      cause: be_a(Bunny::TCPConnectionFailedForAllHosts),
+    )))
   end
 
   it 'does not connect to the broker when there is nothing to publish' do

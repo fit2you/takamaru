@@ -5,6 +5,21 @@ module Takamaru
     # One Bunny session per process, opened lazily and shared by all threads.
     # Bunny sessions are thread-safe while channels are not: every unit of work opens and closes its own channel.
     module Connection
+      # Errors of an unreachable or restarting broker, which go away by themselves. Configuration errors, such as a
+      # wrong password or an exchange redeclared with different properties, are not among them.
+      NETWORK_ERRORS = [
+        Bunny::ChannelAlreadyClosed,
+        Bunny::ConnectionAlreadyClosed,
+        Bunny::ConnectionClosedError,
+        Bunny::ConnectionForced,
+        Bunny::HostListDepleted,
+        Bunny::NetworkErrorWrapper,
+        Bunny::NetworkFailure,
+        Bunny::TCPConnectionFailed,
+        SystemCallError,
+        Timeout::Error,
+      ].freeze
+
       @mutex = Mutex.new
 
       class << self

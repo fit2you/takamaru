@@ -38,4 +38,26 @@ RSpec.describe(Takamaru::RabbitMq::Publisher) do
     expect { publish }.to(raise_error(Takamaru::PublishError, 'Message uuid not confirmed by app.users'))
     expect(channel).to(have_received(:close))
   end
+
+  it 'raises a PublishError, caused by the network error, when the broker is unreachable' do
+    allow(Takamaru::RabbitMq::Connection).to(receive(:session).and_raise(Bunny::TCPConnectionFailedForAllHosts))
+
+    expect { publish }.to(raise_error(Takamaru::PublishError) do |error|
+      expect(error).to(be_a(Takamaru::TransientError))
+      expect(error.cause).to(be_a(Bunny::TCPConnectionFailedForAllHosts))
+    end)
+  end
+
+  it 'raises a PublishError when the connection drops while publishing' do
+    allow(exchange).to(receive(:publish).and_raise(Bunny::ConnectionClosedError.new(channel)))
+
+    expect { publish }.to(raise_error(Takamaru::PublishError) { |error| expect(error.cause).to(be_a(Bunny::ConnectionClosedError)) })
+    expect(channel).to(have_received(:close))
+  end
+
+  it 'does not hide configuration errors' do
+    allow(channel).to(receive(:fanout).and_raise(Bunny::PreconditionFailed.new('inequivalent arg durable', channel, false)))
+
+    expect { publish }.to(raise_error(Bunny::PreconditionFailed))
+  end
 end

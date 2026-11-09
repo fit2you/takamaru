@@ -31,6 +31,20 @@ RSpec.describe(DummiesConsumer) do
       .to(raise_error(ArgumentError, 'Unknown event "instance_eval"'))
   end
 
+  it 'raises an EnqueueError, caused by the backend error, when the job is not enqueued' do
+    allow(DummiesConsumerJob).to(receive(:perform_later).and_raise(Errno::ECONNREFUSED))
+
+    expect { consume(message.to_json) }.to(raise_error(Takamaru::EnqueueError) do |error|
+      expect(error.cause).to(be_a(Errno::ECONNREFUSED))
+    end)
+  end
+
+  it 'raises an EnqueueError when the job backend returns false' do
+    allow(DummiesConsumerJob).to(receive(:perform_later).and_return(false))
+
+    expect { consume(message.to_json) }.to(raise_error(Takamaru::EnqueueError, 'DummiesConsumerJob not enqueued'))
+  end
+
   it 'rejects an invalid payload' do
     expect { consume('invalid') }.to(raise_error(JSON::ParserError))
   end
