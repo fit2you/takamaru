@@ -22,8 +22,9 @@ Upgrading from 0.x? Read [UPGRADING.md](UPGRADING.md).
 
 - The commit log is written in the same transaction of the change: either both are saved or none is.
 - The relay publishes pending commit logs in order, waits for the broker confirm and marks them as published. It runs
-  in `CommitLogRelayJob`, enqueued after every commit, and in the relay process, which publishes every few seconds what
-  the job left behind (failed enqueues, broker outages) and deletes the old published commit logs.
+  in `CommitLogRelayJob`, enqueued once per committed transaction (not once per changed record), and in the relay
+  process, which publishes every few seconds what the job left behind (failed enqueues, broker outages) and deletes
+  the old published commit logs.
 - Messages are persistent, exchanges and queues durable: they survive a broker restart.
 - A consumer acknowledges a message only after its job has been enqueued; failures go to the dead letter queue.
 

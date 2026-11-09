@@ -7,8 +7,9 @@ Breaking release, see [UPGRADING.md](UPGRADING.md).
 ### Added
 
 - `Takamaru::Relay`: publishes the pending commit logs in order, with `FOR UPDATE SKIP LOCKED` to run safely in
-  parallel. It runs in `Takamaru::CommitLogRelayJob`, enqueued after every commit, and in the relay process
-  (`rails takamaru:relay`), which catches up what the job left behind without a job scheduler.
+  parallel. It runs in `Takamaru::CommitLogRelayJob`, enqueued once per committed transaction however many records it
+  changed, and in the relay process (`rails takamaru:relay`), which catches up what the job left behind without a job
+  scheduler.
 - `Takamaru::CommitLogCleanupJob`: deletes published commit logs after `published_retention`, run by the relay process
   every `cleanup_interval` (`rails takamaru:cleanup`).
 - `Takamaru.configure`, with a configurable error handler (`Rails.error.report` by default) and

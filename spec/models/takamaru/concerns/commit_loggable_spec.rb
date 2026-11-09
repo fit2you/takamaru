@@ -65,6 +65,66 @@ RSpec.describe(Takamaru::CommitLoggable) do
       end.to(have_enqueued_job(Takamaru::CommitLogRelayJob).exactly(:once))
     end
 
+    it 'enqueues the relay once for many records changed in the same transaction' do
+      records = Array.new(3) { |index| DummyCommitLoggable.create!(name: "foo #{index}") }
+
+      expect do
+        DummyCommitLoggable.transaction do
+          records.each { |record| record.update!(name: "#{record.name} bar") }
+          DummyCommitLoggable.create!(name: 'baz')
+        end
+      end.to(have_enqueued_job(Takamaru::CommitLogRelayJob).exactly(:once))
+    end
+
+    it 'enqueues the relay once when changes are made in committed savepoints' do
+      expect do
+        DummyCommitLoggable.transaction do
+          DummyCommitLoggable.create!(name: 'foo')
+          DummyCommitLoggable.transaction(requires_new: true) { DummyCommitLoggable.create!(name: 'bar') }
+          DummyCommitLoggable.transaction(requires_new: true) { DummyCommitLoggable.create!(name: 'baz') }
+        end
+      end.to(have_enqueued_job(Takamaru::CommitLogRelayJob).exactly(:once))
+    end
+
+    it 'enqueues the relay once per transaction' do
+      expect do
+        DummyCommitLoggable.create!(name: 'foo')
+        DummyCommitLoggable.create!(name: 'bar')
+      end.to(have_enqueued_job(Takamaru::CommitLogRelayJob).exactly(:twice))
+    end
+
+    it 'enqueues the relay when only a savepoint was rolled back' do
+      expect do
+        DummyCommitLoggable.transaction do
+          DummyCommitLoggable.create!(name: 'foo')
+          DummyCommitLoggable.transaction(requires_new: true) do
+            DummyCommitLoggable.create!(name: 'bar')
+            raise ActiveRecord::Rollback
+          end
+        end
+      end.to(have_enqueued_job(Takamaru::CommitLogRelayJob).exactly(:once))
+    end
+
+    it 'does not enqueue the relay when the only changes were in a rolled back savepoint' do
+      expect do
+        DummyCommitLoggable.transaction do
+          DummyCommitLoggable.transaction(requires_new: true) do
+            DummyCommitLoggable.create!(name: 'foo')
+            raise ActiveRecord::Rollback
+          end
+        end
+      end.not_to(have_enqueued_job(Takamaru::CommitLogRelayJob))
+    end
+
+    it 'does not enqueue the relay after a rolled back transaction' do
+      expect do
+        DummyCommitLoggable.transaction do
+          DummyCommitLoggable.create!(name: 'foo')
+          raise ActiveRecord::Rollback
+        end
+      end.not_to(have_enqueued_job(Takamaru::CommitLogRelayJob))
+    end
+
     it 'does not enqueue the relay when nothing was logged' do
       record = DummyCommitLoggable.create!(name: 'foo')
 
