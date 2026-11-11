@@ -28,8 +28,9 @@ Upgrading from 0.x? Read [UPGRADING.md](UPGRADING.md).
 - Messages are persistent, exchanges and queues durable: they survive a broker restart.
 - A consumer acknowledges a message only after its job has been enqueued; failures go to the dead letter queue.
 
-Delivery is **at least once** and **not ordered**. A message carries only the id of the record: it is a notification
-that the record changed, and the consumer job reads the current state from the owner service (see Shadow models), so
+Delivery is **at least once** and **not ordered**. A message carries only the id of the record (and, if declared, a few
+attributes to filter the messages): it is a notification that the record changed, and the consumer job reads the
+current state from the owner service (see Shadow models), so
 duplicated and out-of-order messages are harmless and the job needs to store neither `message_id` nor `sequence` (they
 are there for logs and diagnosis). A remote record not found means it was deleted: the job must not create it again.
 
@@ -142,7 +143,45 @@ Each create, destroy and update (with changes) publishes:
 ```
 
 Changes that skip Active Record callbacks (`update_columns`, `update_all`, `delete`, `delete_all`, `insert_all`,
-`upsert_all`) are **not** published.
+`upsert_all`, `touch`) are **not** published.
+
+### Attributes in the payload
+
+A model can add a few attributes to the payload, so that the consumers interested in some records only can skip the
+others without reading them from the owner service (e.g. the role of a user, when a consumer keeps only the dealers):
+
+```ruby
+class User < ApplicationRecord
+  include Takamaru::CommitLoggable
+
+  commit_log_attributes :role
+end
+```
+
+```json
+{
+  "event": "update",
+  "id": 42,
+  "attributes": {
+    "role": { "previous": "vendor", "current": "dealer" }
+  },
+  "message_id": "6b0e5f0e-8a4f-4d8e-9a7c-3c1f0b7f5b1e",
+  "occurred_at": "2026-11-03T10:00:00.000000Z",
+  "sequence": 1234
+}
+```
+
+Each attribute is rendered as `previous` and `current` value (attribute values, enums by name):
+
+| event     | `previous`                                                  | `current`             |
+|-----------|-------------------------------------------------------------|-----------------------|
+| `create`  | `null`                                                      | the created value     |
+| `update`  | the value before the save (equal to `current` if unchanged) | the saved value       |
+| `destroy` | the value of the destroyed record                           | equal to `previous`   |
+
+A consumer interested in some values accepts a message when `previous` **or** `current` is one of them, so that a
+record leaving those values (a vendor becoming a dealer) reaches the copies of both. The attributes are a filter, not
+the state: keep them few and small, the job still reads the record.
 
 ## Consuming
 
@@ -159,11 +198,27 @@ end
 
 class UsersConsumerJob < ApplicationJob
   def perform(id, event, metadata = {})
-    # metadata: { 'message_id' => ..., 'occurred_at' => ..., 'sequence' => ... }
+    # metadata: { 'message_id' => ..., 'occurred_at' => ..., 'sequence' => ... }, plus, when the model declares
+    # commit_log_attributes, 'attributes' => { 'role' => { 'previous' => ..., 'current' => ... } }
   end
 end
 
 UsersConsumer.new.consume # blocks until INT or TERM, e.g. in a dedicated process
+```
+
+To skip the messages of the records it is not interested in, a consumer overrides `accept?`: a skipped message is
+acknowledged and its job is not enqueued. `accept?` is called only for the messages carrying attributes; those without
+(e.g. published before the model declared them) are always accepted. `attribute_values(message, name)` returns the
+previous and current values of an attribute, without nils and duplicates:
+
+```ruby
+class DealersConsumer < Takamaru::ShadowModelConsumer
+  private
+
+  def accept?(message)
+    attribute_values(message, 'role').intersect?(%w[dealer branch])
+  end
+end
 ```
 
 The topology is the only definition of the consumer queues. The consumer reads its exchange from it (a consumer not

@@ -154,6 +154,64 @@ RSpec.describe(Takamaru::CommitLoggable) do
     end
   end
 
+  describe '.commit_log_attributes' do
+    let(:record) { DummyRoleCommitLoggable.create!(name: 'foo', role: :vendor) }
+
+    def attributes_of_last_payload
+      last_payload.fetch('attributes')
+    end
+
+    it 'adds the attributes to the payload of a create, without previous values' do
+      record
+
+      expect(last_payload).to(eq(
+        'event' => 'create',
+        'id' => record.id,
+        'attributes' => {
+          'role' => { 'previous' => nil, 'current' => 'vendor' },
+          'name' => { 'previous' => nil, 'current' => 'foo' },
+        },
+      ))
+    end
+
+    it 'adds the previous and current values to the payload of an update (enums by name)' do
+      record.update!(role: :dealer)
+
+      expect(attributes_of_last_payload).to(eq(
+        'role' => { 'previous' => 'vendor', 'current' => 'dealer' },
+        'name' => { 'previous' => 'foo', 'current' => 'foo' },
+      ))
+    end
+
+    it 'uses the values of the last save, also when the record is saved twice in a transaction' do
+      DummyRoleCommitLoggable.transaction do
+        record.update!(role: :dealer)
+        record.update!(name: 'bar')
+      end
+
+      expect(Takamaru::CommitLog.last(2).map { |commit_log| commit_log.payload['attributes'] }).to(eq([
+        { 'role' => { 'previous' => 'vendor', 'current' => 'dealer' }, 'name' => { 'previous' => 'foo', 'current' => 'foo' } },
+        { 'role' => { 'previous' => 'dealer', 'current' => 'dealer' }, 'name' => { 'previous' => 'foo', 'current' => 'bar' } },
+      ]))
+    end
+
+    it 'adds the values of the destroyed record to the payload of a destroy' do
+      record.destroy!
+
+      expect(last_payload).to(include('event' => 'destroy', 'id' => record.id))
+      expect(attributes_of_last_payload).to(eq(
+        'role' => { 'previous' => 'vendor', 'current' => 'vendor' },
+        'name' => { 'previous' => 'foo', 'current' => 'foo' },
+      ))
+    end
+
+    it 'adds nothing to the payload of the models not declaring them' do
+      DummyCommitLoggable.create!(name: 'foo')
+
+      expect(last_payload.keys).to(eq(%w[event id]))
+    end
+  end
+
   describe '#without_commit_log' do
     it 'does not log the changes made inside the block' do
       record = DummyCommitLoggable.new(name: 'foo')

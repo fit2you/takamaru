@@ -15,6 +15,9 @@ Breaking release, see [UPGRADING.md](UPGRADING.md).
 - `Takamaru.configure`, with a configurable error handler (`Rails.error.report` by default) and
   `TAKAMARU_PUBLISHING_ENABLED` to pause publishing.
 - Message metadata: `message_id`, `occurred_at`, `sequence`, passed to consumer jobs as third argument.
+- `commit_log_attributes`: attributes added to the payload as `{ previous, current }` (e.g. the role of a user), passed
+  to consumer jobs with the metadata, to let consumers skip the messages they are not interested in by overriding
+  `ShadowModelConsumer#accept?` (with `attribute_values`); messages without attributes are always accepted.
 - Dead letter queue `<queue>.dead` for each consumer queue.
 - `Takamaru::ShadowClient`: base class describing the client of a shadow model (`find`, `find_by`, `parse`, JSON:API
   by default), and `Takamaru::RemoteRecordNotFound` for missing remote records.

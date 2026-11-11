@@ -1,6 +1,7 @@
 ActiveRecord::Schema.define(version: 20261103000000) do
   create_table 'dummy_commit_loggables', force: true do |t|
     t.string(:name)
+    t.integer(:role)
     t.timestamps(null: false)
   end
 

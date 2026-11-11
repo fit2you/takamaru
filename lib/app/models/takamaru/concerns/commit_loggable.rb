@@ -4,6 +4,12 @@ module Takamaru
   # records it changed.
   #
   # Changes that skip callbacks (update_columns, update_all, delete, delete_all, insert_all, upsert_all) are not logged.
+  #
+  # The payload carries the event and the id of the record, plus the attributes declared with commit_log_attributes,
+  # each with its previous and current value, so that consumers can skip the messages they are not interested in
+  # without reading the record:
+  #
+  #   { 'event' => 'update', 'id' => 42, 'attributes' => { 'role' => { 'previous' => 'vendor', 'current' => 'dealer' } } }
   module CommitLoggable
     extend ActiveSupport::Concern
 
@@ -46,6 +52,8 @@ module Takamaru
     included do
       # Last part of the exchange name "<application name>.<takamaru_class_name>"
       class_attribute :takamaru_class_name, instance_accessor: false, default: name.tableize
+      # Names of the attributes added to the payload (see commit_log_attributes)
+      class_attribute :commit_log_attribute_names, instance_accessor: false, default: [].freeze
 
       after_create { log_commit(:create) }
       after_update { log_commit(:update) if saved_changes? }
@@ -55,6 +63,18 @@ module Takamaru
     class_methods do
       def override_takamaru_class_name(class_name)
         self.takamaru_class_name = class_name
+      end
+
+      # Adds attributes to the payload, to let the consumers filter the messages (e.g. the role of a user): keep them
+      # few and small, the consumers still read the state of the record. Each one is rendered as
+      # { 'previous' => ..., 'current' => ... }:
+      # - create: previous nil, current the created value;
+      # - update: previous the value before the save (equal to current when unchanged), current the saved one;
+      # - destroy: previous and current the value of the destroyed record.
+      # A consumer interested in some values accepts a message when previous or current is one of them: a record
+      # leaving those values (e.g. a vendor becoming a dealer) is notified too.
+      def commit_log_attributes(*names)
+        self.commit_log_attribute_names = names.map(&:to_s).freeze
       end
     end
 
@@ -70,8 +90,28 @@ module Takamaru
     def log_commit(event)
       return if @commit_log_disabled
 
-      CommitLog.create!(exchange_name: commit_log_exchange_name, payload: { 'event' => event.to_s, 'id' => id })
+      CommitLog.create!(exchange_name: commit_log_exchange_name, payload: commit_log_payload(event))
       RelayEnqueuer.enroll(self.class.connection)
+    end
+
+    def commit_log_payload(event)
+      payload = { 'event' => event.to_s, 'id' => id }
+      names = self.class.commit_log_attribute_names
+      payload['attributes'] = names.to_h { |name| [name, commit_log_attribute(event, name)] } if names.any?
+      payload
+    end
+
+    # Called in the after_create, after_update and after_destroy callbacks, where the saved changes are those of the
+    # save just made. Attribute values (enums by name), not readers: previous and current are read the same way.
+    def commit_log_attribute(event, name)
+      current = self[name]
+      previous = case event
+      when :create then nil
+      when :update then attribute_before_last_save(name)
+      when :destroy then current
+      end
+
+      { 'previous' => previous, 'current' => current }
     end
 
     def commit_log_exchange_name

@@ -6,14 +6,18 @@ migration: UPGRADING.md.
 ## Architecture
 
 - `CommitLoggable` (model concern): create/update(with changes)/destroy write a `Takamaru::CommitLog` in the same
-  transaction; `after_commit` enqueues `CommitLogRelayJob`.
+  transaction; `after_commit` enqueues `CommitLogRelayJob`. `commit_log_attributes :role` adds
+  `'attributes' => { 'role' => { 'previous', 'current' } }` to the payload (create: previous nil; update: value before
+  the last save; destroy: previous = current).
 - `Relay#publish_batch`: locks pending rows (`FOR UPDATE SKIP LOCKED`, order by id), publishes with publisher confirms,
   marks published; stops at first failure (`record_failure!`) to keep order. Returns true if the batch was full.
 - `RelayProcess` (`rails takamaru:relay`): loop relay + periodic `CommitLogCleanupJob`, graceful INT/TERM.
 - `RabbitMq::Connection`: one Bunny session per process, fork-safe (pid check). `Publisher`: channel with confirms.
   `Queue`: durable fanout exchange `<publisher app>.<model>`, durable queue `<app>.<consumer>`, DLQ `<queue>.dead` via
   default exchange; manual ack, prefetch, reject→DLQ on error.
-- `ShadowModelConsumer`: parses message, enqueues `"<Consumer>Job".perform_later(id, event, metadata)`.
+- `ShadowModelConsumer`: parses message, enqueues `"<Consumer>Job".perform_later(id, event, metadata)` (metadata
+  includes `attributes`); messages with attributes go through the overridable `accept?` (helper `attribute_values`),
+  messages without are always accepted.
 - `Shadowable`: read-only local copy of remote records via a host-app `ShadowClient` subclass (`find(id)`,
   `find_by(attr, val)`, raise `RemoteRecordNotFound`; `parse` → `{ id:, attributes: }`, default `JsonApiParser`).
   Optional `remote_updated_at` column (generator `shadow_version`): saves the response `updated_at`, skips older ones
@@ -30,8 +34,12 @@ migration: UPGRADING.md.
 ## Decisions (do not revisit without the user)
 
 - Payload is **id-only** + `message_id`, `occurred_at`, `sequence` (= commit log id, monotonic per record). No full
-  entity. Delivery at-least-once, unordered: the job re-reads the current state, so duplicates/disorder are harmless
-  and consumers need no inbox (`message_id`/`sequence` only for diagnosis); concurrency guarded by `remote_updated_at`.
+  entity. Exception (user decision): the attributes declared with `commit_log_attributes`, as `{ previous, current }`,
+  only to filter messages (e.g. user role); they are not state, the job still reads the record. Filtering is in the
+  consumer (`accept?`), not in the broker: exchanges stay fanout (a topic exchange would hide role changes from the
+  copies of the old role). Delivery at-least-once, unordered: the job re-reads the current state, so
+  duplicates/disorder are harmless and consumers need no inbox (`message_id`/`sequence` only for diagnosis);
+  concurrency guarded by `remote_updated_at`.
 - Host apps: 2 Rails projects, Resque (no scheduler) → relay is a dedicated process, not a scheduled job.
 - PostgreSQL only; Rails >= 7.0, Ruby >= 3.1; RabbitMQ >= 3.13.
 - No HTTP client in the gem; no 0.x compatibility (old jobs/consumers are stopped before release).
